@@ -73,7 +73,7 @@ namespace cms_api.Controllers
                     { "docTime", DateTime.Now.toTimeStringFromDate() },
                     { "isActive", value.isActive },
                     { "isHighlight", value.isHighlight },
-                    { "status", "P" },
+                    { "status", value.isActive ? "A" : "N" },
                     { "lv0", value.lv0 },
                     { "lv1", value.lv1 },
                     { "lv2", value.lv2 },
