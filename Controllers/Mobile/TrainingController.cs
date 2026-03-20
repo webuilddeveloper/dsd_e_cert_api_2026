@@ -118,6 +118,14 @@ namespace mobile_api.Controllers
                         if (docTR != null)
                             c.status2 = true;
                     }
+
+                    {
+                        var colTR = new Database().MongoClient<Category>("agency");
+                        var filterTR = Builders<Category>.Filter.Eq("code", c.agency);
+                        var docTR = colTR.Find(filterTR).FirstOrDefault();
+                        if (docTR != null)
+                            c.agency = docTR.title;
+                    }
                 });
 
                 // where by date

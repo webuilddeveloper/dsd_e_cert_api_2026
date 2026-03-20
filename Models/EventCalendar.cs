@@ -43,6 +43,7 @@ namespace cms_api.Models
         public DateTime docDateStartEvent { get; set; }
         public DateTime docDateEndEvent { get; set; }
         public int numberOfDayNotification { get; set; }
+        public string agency { get; set; }
     }
 
     public class EventCalendar2

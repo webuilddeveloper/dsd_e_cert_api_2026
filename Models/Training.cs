@@ -44,7 +44,7 @@ namespace cms_api.Models
         public DateTime docDateEndEvent { get; set; }
         public int numberOfDayNotification { get; set; }
 
-        public string duration { get; set; }
+        public int duration { get; set; }
         public string type { get; set; }
         public string agency { get; set; }
     }

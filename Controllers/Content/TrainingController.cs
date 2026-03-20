@@ -180,7 +180,7 @@ namespace cms_api.Controllers
                 if (!string.IsNullOrEmpty(value.language)) { doc["language"] = value.language; }
                 if (!string.IsNullOrEmpty(value.category)) { doc["category"] = value.category; }
                 if (!string.IsNullOrEmpty(value.title)) { doc["title"] = value.title; }
-                if (!string.IsNullOrEmpty(value.duration)) { doc["duration"] = value.duration; }
+                if (value.duration > 0) { doc["duration"] = value.duration; }
                 if (!string.IsNullOrEmpty(value.type)) { doc["type"] = value.type; }
                 if (!string.IsNullOrEmpty(value.dateStart)) { doc["dateStart"] = value.dateStart; }
                 if (!string.IsNullOrEmpty(value.dateEnd)) { doc["dateEnd"] = value.dateEnd; }

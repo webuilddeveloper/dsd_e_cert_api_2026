@@ -50,10 +50,10 @@ namespace mobile_api.Controllers
                     language = c.language,
                     category = c.category,
                     title = c.title,
-                    duration = c.duration,
-                    type = c.type,
+                    generation = c.generation,
+                    //type = c.type,
                     dateStart = c.dateStart,
-                    dateEnd = c.dateEnd,
+                    //dateEnd = c.dateEnd,
                     agency = c.agency,
 
                     createBy = c.createBy,
@@ -90,10 +90,10 @@ namespace mobile_api.Controllers
                         language = c.language,
                         category = c.category,
                         title = c.title,
-                        duration = c.duration,
-                        type = c.type,
+                        generation = c.generation,
+                        //type = c.type,
                         dateStart = c.dateStart,
-                        dateEnd = c.dateEnd,
+                        //dateEnd = c.dateEnd,
                         agency = c.agency,
 
                         createBy = c.createBy,
@@ -118,6 +118,14 @@ namespace mobile_api.Controllers
                         var docTR = colTR.Find(filterTR).FirstOrDefault();
                         if (docTR != null)
                             c.status2 = true;
+                    }
+
+                    {
+                        var colTR = new Database().MongoClient<Category>("agency");
+                        var filterTR = Builders<Category>.Filter.Eq("code", c.agency);
+                        var docTR = colTR.Find(filterTR).FirstOrDefault();
+                        if (docTR != null)
+                            c.agency = docTR.title;
                     }
                 });
 

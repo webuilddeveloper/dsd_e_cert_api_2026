@@ -64,6 +64,7 @@ namespace cms_api.Controllers
                     { "view", value.view},
                     { "linkFacebook", value.linkFacebook},
                     { "linkYoutube", value.linkYoutube},
+                    { "agency", value.agency},
                     { "numberOfDayNotification", value.numberOfDayNotification},
                     { "dateStart", value.dateStart == "Invalid date" ? "" : value.dateStart},
                     { "dateEnd", value.dateEnd == "Invalid date" ? "" : value.dateEnd},
@@ -198,6 +199,7 @@ namespace cms_api.Controllers
                 if (!string.IsNullOrEmpty(value.dateEnd)) { doc["dateEnd"] = value.dateEnd; }
                 if (!string.IsNullOrEmpty(value.dateStart)) { doc["dateStart"] = value.dateStart; }
                 if (!string.IsNullOrEmpty(value.updateBy)) { doc["updateBy"] = value.updateBy; }
+                if (!string.IsNullOrEmpty(value.agency)) { doc["agency"] = value.agency; }
 
 
                 doc["fileUrl"] = value.fileUrl;

@@ -87,6 +87,15 @@ namespace mobile_api.Controllers
                         dateBetween = Between(date.toDateFromString(), c.dateStart.toDateFromString(), c.dateEnd.toDateFromString());
                         if (dateBetween)
                         {
+                            try
+                            {
+                                var colTR = new Database().MongoClient<Category>("agency");
+                                var filterTR = Builders<Category>.Filter.Eq("code", c.agency);
+                                var docTR = colTR.Find(filterTR).FirstOrDefault();
+                                if (docTR != null)
+                                    c.agency = docTR.title;
+                            }
+                            catch { }
                             filterData.Add(c);
                         }
                     }
