@@ -70,6 +70,14 @@ namespace mobile_api.Controllers
                         }
                     }
 
+                    {
+                        var filter = Builders<BsonDocument>.Filter.Eq("idcard", value.idcard) & Builders<BsonDocument>.Filter.Eq("category", value.category) & Builders<BsonDocument>.Filter.Ne("status", "D");
+                        if (col.Find(filter).Any())
+                        {
+                            return new Response { status = "E", message = $"idcard: {value.idcard} is exist", jsonData = value.ToJson(), objectData = value };
+                        }
+                    }
+
                     doc = new BsonDocument
                     {
                         { "code", value.code },
@@ -110,15 +118,15 @@ namespace mobile_api.Controllers
                         { "province", value.province },
                         { "postnoCode", value.postnoCode },
                         { "postno", value.postno },
-                        { "job", value.job },
+                        //{ "job", value.job },
                         { "idcard", value.idcard },
-                        { "officerCode", value.officerCode },
-                        { "countUnit", value.countUnit },
-                        { "lv0", value.lv0 },
-                        { "lv1", value.lv1 },
-                        { "lv2", value.lv2 },
-                        { "lv3", value.lv3 },
-                        { "lv4", value.lv4 },
+                        //{ "officerCode", value.officerCode },
+                        //{ "countUnit", value.countUnit },
+                        //{ "lv0", value.lv0 },
+                        //{ "lv1", value.lv1 },
+                        //{ "lv2", value.lv2 },
+                        //{ "lv3", value.lv3 },
+                        //{ "lv4", value.lv4 },
                         { "linkAccount", value.linkAccount },
                         { "appleID", value.appleID }
                 };
@@ -357,55 +365,55 @@ namespace mobile_api.Controllers
             {
                 value.logCreate("register/update", value.code);
 
-                var col2 = new Database().MongoClient("register");
-                var filter2 = Builders<BsonDocument>.Filter.Eq("email", value.email);
+                //var col2 = new Database().MongoClient("register");
+                //var filter2 = Builders<BsonDocument>.Filter.Eq("email", value.email);
 
 
-                if (!string.IsNullOrEmpty(value.category) && !string.IsNullOrEmpty(value.code))
-                {
-                    var col3 = new Database().MongoClient<Register>("register");
-                    var filter3 = Builders<Register>.Filter.Ne("status", "D") & Builders<Register>.Filter.Eq("code", value.code);
-                    var doc3 = col3.Find(filter3).Project(c => new { c.countUnit }).FirstOrDefault();
+                //if (!string.IsNullOrEmpty(value.category) && !string.IsNullOrEmpty(value.code))
+                //{
+                //    var col3 = new Database().MongoClient<Register>("register");
+                //    var filter3 = Builders<Register>.Filter.Ne("status", "D") & Builders<Register>.Filter.Eq("code", value.code);
+                //    var doc3 = col3.Find(filter3).Project(c => new { c.countUnit }).FirstOrDefault();
 
-                    var dataCountUnit = "";
-                    if (string.IsNullOrEmpty(doc3.countUnit))
-                    {
-                        dataCountUnit = "[]";
-                    }
-                    else
-                    {
-                        dataCountUnit = doc3.countUnit;
-                    }
+                //    var dataCountUnit = "";
+                //    if (string.IsNullOrEmpty(doc3.countUnit))
+                //    {
+                //        dataCountUnit = "[]";
+                //    }
+                //    else
+                //    {
+                //        dataCountUnit = doc3.countUnit;
+                //    }
 
-                    List<CountUnit> countUnitDB = JsonConvert.DeserializeObject<List<CountUnit>>(dataCountUnit); // count unit from database
-                    List<CountUnit> countUnitValue = JsonConvert.DeserializeObject<List<CountUnit>>(value.countUnit); // count unit from value
+                //    List<CountUnit> countUnitDB = JsonConvert.DeserializeObject<List<CountUnit>>(dataCountUnit); // count unit from database
+                //    List<CountUnit> countUnitValue = JsonConvert.DeserializeObject<List<CountUnit>>(value.countUnit); // count unit from value
 
-                    if (countUnitDB.Count != countUnitValue.Count)
-                    {
-                        if (countUnitValue.Count == 0)
-                        {
-                            value.isActive = false;
-                            value.status = "N";
-                        }
-                        else if (countUnitValue.Count > 0)
-                        {
-                            for (int i = 0; i < countUnitValue.Count; i++)
-                            {
-                                if (countUnitValue[i].status != "A")
-                                {
-                                    value.isActive = false;
-                                    value.status = "V";
-                                    break;
-                                }
-                                else
-                                {
-                                    value.isActive = true;
-                                    value.status = "A";
-                                }
-                            }
-                        }
-                    }
-                }
+                //    if (countUnitDB.Count != countUnitValue.Count)
+                //    {
+                //        if (countUnitValue.Count == 0)
+                //        {
+                //            value.isActive = false;
+                //            value.status = "N";
+                //        }
+                //        else if (countUnitValue.Count > 0)
+                //        {
+                //            for (int i = 0; i < countUnitValue.Count; i++)
+                //            {
+                //                if (countUnitValue[i].status != "A")
+                //                {
+                //                    value.isActive = false;
+                //                    value.status = "V";
+                //                    break;
+                //                }
+                //                else
+                //                {
+                //                    value.isActive = true;
+                //                    value.status = "A";
+                //                }
+                //            }
+                //        }
+                //    }
+                //}
 
                 // start update linkAccount
                 var col = new Database().MongoClient("register");
@@ -467,15 +475,15 @@ namespace mobile_api.Controllers
                     doc["province"] = value.province;
                     doc["postnoCode"] = value.postnoCode;
                     doc["postno"] = value.postno;
-                    doc["job"] = value.job;
+                    //doc["job"] = value.job;
                     doc["idcard"] = value.idcard;
-                    doc["officerCode"] = value.officerCode;
-                    doc["countUnit"] = value.countUnit;
-                    doc["lv0"] = value.lv0;
-                    doc["lv1"] = value.lv1;
-                    doc["lv2"] = value.lv2;
-                    doc["lv3"] = value.lv3;
-                    doc["lv4"] = value.lv4;
+                    //doc["officerCode"] = value.officerCode;
+                    //doc["countUnit"] = value.countUnit;
+                    //doc["lv0"] = value.lv0;
+                    //doc["lv1"] = value.lv1;
+                    //doc["lv2"] = value.lv2;
+                    //doc["lv3"] = value.lv3;
+                    //doc["lv4"] = value.lv4;
                     doc["linkAccount"] = value.linkAccount;
                     doc["description"] = value.description;
                     doc["isActive"] = value.isActive;
@@ -483,6 +491,8 @@ namespace mobile_api.Controllers
                     doc["updateBy"] = value.updateBy;
                     doc["updateDate"] = DateTime.Now.toStringFromDate();
                     doc["appleID"] = value.appleID;
+
+                    doc["imageUrl"] = value.imageUrl;
                     col.ReplaceOne(filter, doc);
                 }
                 else if (!string.IsNullOrEmpty(value.linkAccount))
