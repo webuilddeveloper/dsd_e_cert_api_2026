@@ -361,17 +361,37 @@ namespace mobilev2_api.Controllers
                 var col = new Database().MongoClient<Register>("register");
                 var filter = Builders<Register>.Filter.Ne(x => x.status, "D");
                 filter &= Builders<Register>.Filter.Eq("category", "facebook");
-                filter &= Builders<Register>.Filter.Eq("email", value.email);
+                filter &= Builders<Register>.Filter.Eq("facebookID", value.facebookID);
 
-                var idcard = col.Find(filter).Project(c => new { c.idcard, c.code }).FirstOrDefault();
-                var driverLicence = new Database().MongoClient<driverLicenceInfobase>("driverLicence")
-                    .Find(Builders<driverLicenceInfobase>.Filter.Eq("docNo", idcard?.idcard ?? "")
-                    & Builders<driverLicenceInfobase>.Filter.Eq("reference", idcard?.code ?? "")
-                    & Builders<driverLicenceInfobase>.Filter.Ne("status", "D")
-                    ).ToList();
-                var doc = col.Find(filter).Project(c => new { c.idcard, c.code, c.username, c.password, c.category, c.imageUrl, c.firstName, c.lastName, c.countUnit, c.lv0, c.lv1, c.lv2, c.lv3, c.lv4, c.lv0List, c.lv1List, c.lv2List, c.lv3List, c.lv4List,
+                //var idcard = col.Find(filter).Project(c => new { c.idcard, c.code }).FirstOrDefault();
+                //var driverLicence = new Database().MongoClient<driverLicenceInfobase>("driverLicence")
+                //    .Find(Builders<driverLicenceInfobase>.Filter.Eq("docNo", idcard?.idcard ?? "")
+                //    & Builders<driverLicenceInfobase>.Filter.Eq("reference", idcard?.code ?? "")
+                //    & Builders<driverLicenceInfobase>.Filter.Ne("status", "D")
+                //    ).ToList();
+                var doc = col.Find(filter).Project(c => new
+                {
+                    c.idcard,
+                    c.code,
+                    c.username,
+                    c.password,
+                    c.category,
+                    c.imageUrl,
+                    c.firstName,
+                    c.lastName,
+                    c.countUnit,
+                    c.lv0,
+                    c.lv1,
+                    c.lv2,
+                    c.lv3,
+                    c.lv4,
+                    c.lv0List,
+                    c.lv1List,
+                    c.lv2List,
+                    c.lv3List,
+                    c.lv4List,
                     isDF = c.status == "A" ? true : false,
-                    driverLicence = idcard != null ? driverLicence.FirstOrDefault(c => c.isActive) : new driverLicenceInfobase()
+                    //driverLicence = idcard != null ? driverLicence.FirstOrDefault(c => c.isActive) : new driverLicenceInfobase()
                 }).FirstOrDefault();
 
                 if (doc == null)
@@ -381,7 +401,7 @@ namespace mobilev2_api.Controllers
                     this.create(value);
                     var newDoc = col.Find(filter).Project(c => new { c.idcard, c.code, c.username, c.password, c.category, c.prefixName, c.firstName, c.lastName, c.imageUrl, c.email, c.phone, c.countUnit, c.lv0, c.lv1, c.lv2, c.lv3, c.lv4, c.lv0List, c.lv1List, c.lv2List, c.lv3List, c.lv4List,
                         isDF = c.status == "A" ? true : false,
-                        driverLicence = driverLicence.FirstOrDefault(c => c.isActive)
+                        //driverLicence = driverLicence.FirstOrDefault(c => c.isActive)
                     }).FirstOrDefault();
                     return new Response { status = "S", message = "success", objectData = newDoc };
                 }
@@ -406,18 +426,18 @@ namespace mobilev2_api.Controllers
                 var col = new Database().MongoClient<Register>("register");
                 var filter = Builders<Register>.Filter.Ne(x => x.status, "D");
                 filter &= Builders<Register>.Filter.Eq("category", "google");
-                filter &= Builders<Register>.Filter.Eq("email", value.email);
+                filter &= Builders<Register>.Filter.Eq("googleID", value.googleID);
 
 
-                var idcard = col.Find(filter).Project(c => new { c.idcard, c.code }).FirstOrDefault();
-                var driverLicence = new Database().MongoClient<driverLicenceInfobase>("driverLicence")
-                    .Find(Builders<driverLicenceInfobase>.Filter.Eq("docNo", idcard?.idcard ?? "")
-                    & Builders<driverLicenceInfobase>.Filter.Eq("reference", idcard?.code ?? "")
-                    & Builders<driverLicenceInfobase>.Filter.Ne("status", "D")
-                    ).ToList();
+                //var idcard = col.Find(filter).Project(c => new { c.idcard, c.code }).FirstOrDefault();
+                //var driverLicence = new Database().MongoClient<driverLicenceInfobase>("driverLicence")
+                //    .Find(Builders<driverLicenceInfobase>.Filter.Eq("docNo", idcard?.idcard ?? "")
+                //    & Builders<driverLicenceInfobase>.Filter.Eq("reference", idcard?.code ?? "")
+                //    & Builders<driverLicenceInfobase>.Filter.Ne("status", "D")
+                //    ).ToList();
                 var doc = col.Find(filter).Project(c => new { c.idcard, c.code, c.username, c.password, c.category, c.imageUrl, c.firstName, c.lastName, c.countUnit, c.lv0, c.lv1, c.lv2, c.lv3, c.lv4, c.lv0List, c.lv1List, c.lv2List, c.lv3List, c.lv4List,
                     isDF = c.status == "A" ? true : false,
-                    driverLicence = idcard != null ? driverLicence.FirstOrDefault(c => c.isActive) : new driverLicenceInfobase()
+                    //driverLicence = idcard != null ? driverLicence.FirstOrDefault(c => c.isActive) : new driverLicenceInfobase()
                 }).FirstOrDefault();
 
                 if (doc == null)
@@ -427,7 +447,7 @@ namespace mobilev2_api.Controllers
                     this.create(value);
                     var newDoc = col.Find(filter).Project(c => new { c.idcard, c.code, c.username, c.password, c.category, c.prefixName, c.firstName, c.lastName, c.imageUrl, c.email, c.phone, c.countUnit, c.lv0, c.lv1, c.lv2, c.lv3, c.lv4, c.lv0List, c.lv1List, c.lv2List, c.lv3List, c.lv4List,
                         isDF = c.status == "A" ? true : false,
-                        driverLicence = driverLicence.FirstOrDefault(c => c.isActive)
+                        //driverLicence = driverLicence.FirstOrDefault(c => c.isActive)
                     }).FirstOrDefault();
                     return new Response { status = "S", message = "success", objectData = newDoc };
                 }
@@ -452,15 +472,15 @@ namespace mobilev2_api.Controllers
                 var col = new Database().MongoClient<Register>("register");
                 var filter = Builders<Register>.Filter.Ne(x => x.status, "D");
                 filter &= Builders<Register>.Filter.Eq("category", "apple");
-                filter &= Builders<Register>.Filter.Eq("email", value.email);
+                filter &= Builders<Register>.Filter.Eq("appleID", value.appleID);
 
 
-                var idcard = col.Find(filter).Project(c => new { c.idcard, c.code }).FirstOrDefault();
-                var driverLicence = new Database().MongoClient<driverLicenceInfobase>("driverLicence")
-                    .Find(Builders<driverLicenceInfobase>.Filter.Eq("docNo", idcard?.idcard ?? "")
-                    & Builders<driverLicenceInfobase>.Filter.Eq("reference", idcard?.code ?? "")
-                    & Builders<driverLicenceInfobase>.Filter.Ne("status", "D")
-                    ).ToList();
+                //var idcard = col.Find(filter).Project(c => new { c.idcard, c.code }).FirstOrDefault();
+                //var driverLicence = new Database().MongoClient<driverLicenceInfobase>("driverLicence")
+                //    .Find(Builders<driverLicenceInfobase>.Filter.Eq("docNo", idcard?.idcard ?? "")
+                //    & Builders<driverLicenceInfobase>.Filter.Eq("reference", idcard?.code ?? "")
+                //    & Builders<driverLicenceInfobase>.Filter.Ne("status", "D")
+                //    ).ToList();
                 var doc = col.Find(filter).Project(c => new {
                     c.idcard,
                     c.code,
@@ -482,7 +502,7 @@ namespace mobilev2_api.Controllers
                     c.lv3List,
                     c.lv4List,
                     isDF = c.status == "A" ? true : false,
-                    driverLicence = idcard != null ? driverLicence.FirstOrDefault(c => c.isActive) : new driverLicenceInfobase()
+                    //driverLicence = idcard != null ? driverLicence.FirstOrDefault(c => c.isActive) : new driverLicenceInfobase()
                 }).FirstOrDefault();
 
                 if (doc == null)
@@ -514,7 +534,7 @@ namespace mobilev2_api.Controllers
                         c.lv3List,
                         c.lv4List,
                         isDF = c.status == "A" ? true : false,
-                        driverLicence = driverLicence.FirstOrDefault(c => c.isActive)
+                        //driverLicence = driverLicence.FirstOrDefault(c => c.isActive)
                     }).FirstOrDefault();
                     return new Response { status = "S", message = "success", objectData = newDoc };
                 }
@@ -541,16 +561,16 @@ namespace mobilev2_api.Controllers
                 filter &= Builders<Register>.Filter.Eq("category", "line");
                 filter &= Builders<Register>.Filter.Eq("lineID", value.lineID);
 
-                var idcard = col.Find(filter).Project(c => new { c.idcard, c.code }).FirstOrDefault();
-                var driverLicence = new Database().MongoClient<driverLicenceInfobase>("driverLicence")
-                    .Find(Builders<driverLicenceInfobase>.Filter.Eq("docNo", idcard?.idcard ?? "")
-                    & Builders<driverLicenceInfobase>.Filter.Eq("reference", idcard?.code ?? "")
-                    & Builders<driverLicenceInfobase>.Filter.Ne("status", "D")
-                    ).ToList();
+                //var idcard = col.Find(filter).Project(c => new { c.idcard, c.code }).FirstOrDefault();
+                //var driverLicence = new Database().MongoClient<driverLicenceInfobase>("driverLicence")
+                //    .Find(Builders<driverLicenceInfobase>.Filter.Eq("docNo", idcard?.idcard ?? "")
+                //    & Builders<driverLicenceInfobase>.Filter.Eq("reference", idcard?.code ?? "")
+                //    & Builders<driverLicenceInfobase>.Filter.Ne("status", "D")
+                //    ).ToList();
 
                 var doc = col.Find(filter).Project(c => new { c.idcard, c.code, c.username, c.password, c.category, c.imageUrl, c.firstName, c.lastName, c.countUnit, c.lv0, c.lv1, c.lv2, c.lv3, c.lv4, c.lv0List, c.lv1List, c.lv2List, c.lv3List, c.lv4List,
                     isDF = c.status == "A" ? true : false,
-                    driverLicence = idcard != null ? driverLicence.FirstOrDefault(c => c.isActive) : new driverLicenceInfobase()
+                    //driverLicence = idcard != null ? driverLicence.FirstOrDefault(c => c.isActive) : new driverLicenceInfobase()
                 }).FirstOrDefault();
 
                 if (doc == null)
@@ -560,7 +580,7 @@ namespace mobilev2_api.Controllers
                     this.create(value);
                     var newDoc = col.Find(filter).Project(c => new { c.idcard, c.code, c.username, c.password, c.category, c.prefixName, c.firstName, c.lastName, c.imageUrl, c.email, c.phone, c.countUnit, c.lv0, c.lv1, c.lv2, c.lv3, c.lv4, c.lv0List, c.lv1List, c.lv2List, c.lv3List, c.lv4List,
                         isDF = c.status == "A" ? true : false,
-                        driverLicence = driverLicence.FirstOrDefault(c => c.isActive)
+                        //driverLicence = driverLicence.FirstOrDefault(c => c.isActive)
                     }).FirstOrDefault();
                     return new Response { status = "S", message = "success", objectData = newDoc };
                 }
