@@ -23,7 +23,7 @@ namespace mobile_api.Controllers
             {
                 value.statisticsCreate("privilege");
                 var col = new Database().MongoClient<Privilege>( "privilege");
-                var filter = (Builders<Privilege>.Filter.Eq("status", "A") & value.filterOrganization<Privilege>());
+                var filter = (Builders<Privilege>.Filter.Eq("status", "A") );
 
                 if (!string.IsNullOrEmpty(value.code)) { filter = filter & Builders<Privilege>.Filter.Regex("code", value.code); }
                 if (!string.IsNullOrEmpty(value.keySearch)) { filter = filter & Builders<Privilege>.Filter.Regex("title", new BsonRegularExpression(string.Format(".*{0}.*", value.keySearch), "i")); }
@@ -63,16 +63,37 @@ namespace mobile_api.Controllers
                     doc["view"] = view + 1;
                     colUpdate.ReplaceOne(filterUpdate, doc);
 
-                    docs = col.Aggregate().Match(filter).SortByDescending(o => o.docDate).Skip(value.skip).Limit(value.limit)
-                                      .Lookup("privilegeCategory", "category", "code", "categoryList")
-                                          .Lookup("register", "createBy", "username", "userList")
-                                      .As<Privilege>()
-                                      .ToList();
+                    {
+
+                        var colUpdateReadContent = new Database().MongoClient("privilegeReadContent");
+                        var filterReadContent = Builders<BsonDocument>.Filter.Eq("code", value.code) & Builders<BsonDocument>.Filter.Eq("profileCode", value.profileCode);
+                        if (!colUpdateReadContent.Find(filterReadContent).Any())
+                        {
+                            var docReadContent = new BsonDocument
+                            {
+                                { "code", value.code },
+                                { "profileCode", value.profileCode },
+                                { "createBy", value.createBy },
+                                { "createDate", DateTime.Now.toStringFromDate() },
+                                { "createTime", DateTime.Now.toTimeStringFromDate() },
+                            };
+                            colUpdateReadContent.InsertOne(docReadContent);
+                        }
+                    }
 
                     //docs = col.Find(filter).SortBy(o => o.sequence).ThenByDescending(o => o.updateDate).Skip(value.skip).Limit(value.limit).Project(c => new { c.code, c.imageUrl, c.category, c.title, c.language, c.description, c.titleEN, c.descriptionEN, c.view, c.createDate, c.createBy, c.imageUrlCreateBy }).ToList();
                 }
                 //END :update view <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
+                docs.ForEach(c =>
+                {
+                    var colUpdateReadContent = new Database().MongoClient("privilegeReadContent");
+                    var filterReadContent = Builders<BsonDocument>.Filter.Eq("code", value.code) & Builders<BsonDocument>.Filter.Eq("profileCode", value.profileCode);
+                    if (colUpdateReadContent.Find(filterReadContent).Any())
+                    {
+                        c.isRead = true;
+                    }
+                });
                 //var docs = col.Find(filter).SortByDescending(o => o.docDate).Skip(value.skip).Limit(value.limit).Project(c => new { c.code, c.isActive, c.createBy, c.imageUrlCreateBy, c.createDate, c.description, c.descriptionEN, c.titleEN, c.imageUrl, c.title, c.language, c.updateBy, c.updateDate, c.sequence, c.category, c.dateStart, c.dateEnd, c.receive }).ToList();
 
                 return new Response { status = "S", message = "success", jsonData = docs.ToJson(), objectData = docs, totalData = col.Find(filter).ToList().Count() };

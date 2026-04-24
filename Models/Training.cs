@@ -25,6 +25,7 @@ namespace cms_api.Models
 
             docDateStartEvent = DateTime.Now;
             docDateEndEvent = DateTime.Now;
+            isRead = false;
         }
 
        
@@ -47,5 +48,6 @@ namespace cms_api.Models
         public int duration { get; set; }
         public string type { get; set; }
         public string agency { get; set; }
+        public bool isRead { get; set; }
     }
 }

@@ -11,6 +11,7 @@ namespace cms_api.Models
             dateEnd = "";
             receive = false;
             view = 0;
+            isRead = false;
         }
 
         public string imageUrl { get; set; }
@@ -19,5 +20,6 @@ namespace cms_api.Models
         public string dateEnd { get; set; }
         public bool receive { get; set; }
         public int view { get; set; }
+        public bool isRead { get; set; }
     }
 }

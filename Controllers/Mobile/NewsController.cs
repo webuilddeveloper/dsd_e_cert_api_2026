@@ -31,9 +31,9 @@ namespace mobile_api.Controllers
                 var filterCategory = (Builders<Category>.Filter.Eq("status", "A"));
                 List<Category> docsCategory = colCategory.Aggregate().Match(filterCategory).ToList();
 
-                var colRegister = new Database().MongoClient<Register>("register");
-                var filterRegister = (Builders<Register>.Filter.Eq("status", "A") & Builders<Register>.Filter.Eq("category", ""));
-                List<Register> docRegister = colRegister.Aggregate().Match(filterRegister).ToList();
+                //var colRegister = new Database().MongoClient<Register>("register");
+                //var filterRegister = (Builders<Register>.Filter.Eq("status", "A") & Builders<Register>.Filter.Eq("category", ""));
+                //List<Register> docRegister = colRegister.Aggregate().Match(filterRegister).ToList();
 
                 if (!string.IsNullOrEmpty(value.code)) { filter = filter & Builders<News>.Filter.Regex("code", value.code); }
                 if (!string.IsNullOrEmpty(value.keySearch))
@@ -60,8 +60,8 @@ namespace mobile_api.Controllers
                 if (!string.IsNullOrEmpty(value.language)) { filter = filter & Builders<News>.Filter.Regex("language", value.language); }
                 if (value.isHighlight) { filter = filter & Builders<News>.Filter.Eq("isHighlight", value.isHighlight); }
                 if (value.isPublic) { filter = filter & Builders<News>.Filter.Eq("isPublic", value.isPublic); }
-                if (!string.IsNullOrEmpty(value.app)) { filter = filter & Builders<News>.Filter.Eq("app", value.app); }
-                else { filter = filter & Builders<News>.Filter.Nin("app", new[] { "marine", "massage", "security", "guide" }); }
+                //if (!string.IsNullOrEmpty(value.app)) { filter = filter & Builders<News>.Filter.Eq("app", value.app); }
+                //else { filter = filter & Builders<News>.Filter.Nin("app", new[] { "marine", "massage", "security", "guide" }); }
 
                 //filter = filter & (Builders<BsonDocument>.Filter.Eq(x => x.B, "4") | Builders<User>.Filter.Eq(x => x.B, "5"));
 
@@ -98,9 +98,12 @@ namespace mobile_api.Controllers
 
                 docs.ForEach(c =>
                 {
-                    foreach(var o in docRegister)
+                    var colRegister = new Database().MongoClient<Register>("register");
+                    var filterRegister = (Builders<Register>.Filter.Eq("status", "A") & Builders<Register>.Filter.Eq("category", "") & Builders<Register>.Filter.Eq("username", c.createBy));
+                    List<Register> docRegister = colRegister.Aggregate().Match(filterRegister).ToList();
+                    foreach (var o in docRegister)
                     {
-                        if(c.createBy == o.username)
+                        if (c.createBy == o.username)
                         {
                             c.userList = new List<Register1>();
                             c.userList.Add(new Register1
@@ -132,6 +135,13 @@ namespace mobile_api.Controllers
                             break;
                         }
                     }
+
+                var colUpdateReadContent = new Database().MongoClient("newsReadContent");
+                var filterReadContent = Builders<BsonDocument>.Filter.Eq("code", value.code) & Builders<BsonDocument>.Filter.Eq("profileCode", value.profileCode);
+                    if (colUpdateReadContent.Find(filterReadContent).Any())
+                    {
+                        c.isRead = true;
+                    }
                 });
 
                 //List<News> docs = col.Aggregate().Match(filter).SortBy(o => o.sequence).ThenByDescending(o => o.docDate).ThenByDescending(o => o.updateTime).Skip(value.skip).Limit(value.limit)
@@ -157,6 +167,23 @@ namespace mobile_api.Controllers
                     doc["view"] = view + 1;
                     colUpdate.ReplaceOne(filterUpdate, doc);
 
+                    {
+
+                        var colUpdateReadContent = new Database().MongoClient("newsReadContent");
+                        var filterReadContent = Builders<BsonDocument>.Filter.Eq("code", value.code) & Builders<BsonDocument>.Filter.Eq("profileCode", value.profileCode);
+                        if (!colUpdateReadContent.Find(filterReadContent).Any())
+                        {
+                            var docReadContent = new BsonDocument
+                            {
+                                { "code", value.code },
+                                { "profileCode", value.profileCode },
+                                { "createBy", value.createBy },
+                                { "createDate", DateTime.Now.toStringFromDate() },
+                                { "createTime", DateTime.Now.toTimeStringFromDate() },
+                            };
+                            colUpdateReadContent.InsertOne(docReadContent);
+                        }
+                    }
                     //docs = col.Aggregate().Match(filter).SortByDescending(o => o.docDate).Skip(value.skip).Limit(value.limit)
                     //                      .Lookup("newsCategory", "category", "code", "categoryList")
                     //                      .Lookup("register", "createBy", "username", "userList")

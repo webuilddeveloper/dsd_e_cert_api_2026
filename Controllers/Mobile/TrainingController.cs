@@ -23,7 +23,7 @@ namespace mobile_api.Controllers
             try
             {
                 var col = new Database().MongoClient<Training>( "training");
-                var filter = (Builders<Training>.Filter.Eq("status", "A") & value.filterOrganization<Training>());
+                var filter = (Builders<Training>.Filter.Eq("status", "A") );
 
                 if (!string.IsNullOrEmpty(value.code)) { filter = filter & Builders<Training>.Filter.Eq("code", value.code); }
                 if (!string.IsNullOrEmpty(value.keySearch)) { filter = filter & Builders<Training>.Filter.Regex("title", new BsonRegularExpression(string.Format(".*{0}.*", value.keySearch), "i")); }
@@ -79,31 +79,23 @@ namespace mobile_api.Controllers
                     doc["view"] = view + 1;
                     colUpdate.ReplaceOne(filterUpdate, doc);
 
-                    docs = col.Find(filter).SortByDescending(o => o.docDate).ThenByDescending(o => o.updateTime).Skip(value.skip).Limit(value.limit).Project(c => new Training
                     {
-                        code = c.code,
-                        isActive = c.isActive,
 
-                        imageUrl = c.imageUrl,
-                        sequence = c.sequence,
-                        language = c.language,
-                        category = c.category,
-                        title = c.title,
-                        duration = c.duration,
-                        type = c.type,
-                        dateStart = c.dateStart,
-                        dateEnd = c.dateEnd,
-                        agency = c.agency,
-
-                        createBy = c.createBy,
-                        createDate = c.createDate,
-                        updateBy = c.updateBy,
-                        updateDate = c.updateDate,
-                        imageUrlCreateBy = c.imageUrlCreateBy,
-                        view = c.view,
-                        status = c.status,
-                        status2 = c.status2
-                    }).ToList();
+                        var colUpdateReadContent = new Database().MongoClient("trainingReadContent");
+                        var filterReadContent = Builders<BsonDocument>.Filter.Eq("code", value.code) & Builders<BsonDocument>.Filter.Eq("profileCode", value.profileCode);
+                        if (!colUpdateReadContent.Find(filterReadContent).Any())
+                        {
+                            var docReadContent = new BsonDocument
+                            {
+                                { "code", value.code },
+                                { "profileCode", value.profileCode },
+                                { "createBy", value.createBy },
+                                { "createDate", DateTime.Now.toStringFromDate() },
+                                { "createTime", DateTime.Now.toTimeStringFromDate() },
+                            };
+                            colUpdateReadContent.InsertOne(docReadContent);
+                        }
+                    }
                 }
                 //END :update view <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
@@ -125,6 +117,15 @@ namespace mobile_api.Controllers
                         var docTR = colTR.Find(filterTR).FirstOrDefault();
                         if (docTR != null)
                             c.agency = docTR.title;
+                    }
+
+                    {
+                        var colUpdateReadContent = new Database().MongoClient("trainingReadContent");
+                        var filterReadContent = Builders<BsonDocument>.Filter.Eq("code", value.code) & Builders<BsonDocument>.Filter.Eq("profileCode", value.profileCode);
+                        if (colUpdateReadContent.Find(filterReadContent).Any())
+                        {
+                            c.isRead = true;
+                        }
                     }
                 });
 

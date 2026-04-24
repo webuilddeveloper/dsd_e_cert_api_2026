@@ -14,11 +14,13 @@ namespace cms_api.Models
             imageUrlCreateBy = "";
             view = 0;
             totalLv = 0;
+            isRead = false;
         }
 
         public string imageUrl { get; set; }
         public string imageUrlCreateBy { get; set; }
         public int view { get; set; }
         public int totalLv { get; set; }
+        public bool isRead { get; set; }
     }
 }

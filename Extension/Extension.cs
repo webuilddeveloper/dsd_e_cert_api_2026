@@ -127,7 +127,7 @@ namespace cms_api.Extension
         {
             try
             {
-                value.databaseName = "khub_dee_prod_statistics";
+                value.databaseName = "dsd_e_prod_statistics";
                 value.page = page;
 
                 HttpClient client = new HttpClient();
