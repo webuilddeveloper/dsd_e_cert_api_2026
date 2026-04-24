@@ -137,7 +137,7 @@ namespace mobile_api.Controllers
                     }
 
                 var colUpdateReadContent = new Database().MongoClient("newsReadContent");
-                var filterReadContent = Builders<BsonDocument>.Filter.Eq("code", value.code) & Builders<BsonDocument>.Filter.Eq("profileCode", value.profileCode);
+                var filterReadContent = Builders<BsonDocument>.Filter.Eq("code", c.code) & Builders<BsonDocument>.Filter.Eq("profileCode", value.profileCode);
                     if (colUpdateReadContent.Find(filterReadContent).Any())
                     {
                         c.isRead = true;
