@@ -3064,7 +3064,7 @@ namespace mobile_api.Controllers
             {
                 var col = new Database().MongoClient<RegisterInterestModel>("registerInterest");
 
-                var filter = Builders<RegisterInterestModel>.Filter.Eq("profileCode", value.profileCode) & Builders<RegisterInterestModel>.Filter.Eq("isActive", true); ;
+                var filter = Builders<RegisterInterestModel>.Filter.Eq("profileCode", value.profileCode);
 
                 var docs = col.Find(filter).Project(p => new {p.code,p.profileCode,p.trainingCategory,p.isActive,p.createBy,p.createDate,p.createTime,p.updateBy,p.updateDate,p.updateTime,p.docDate,p.docTime}).ToList();
 

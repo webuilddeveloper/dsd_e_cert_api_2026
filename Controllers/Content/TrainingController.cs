@@ -404,6 +404,7 @@ namespace cms_api.Controllers
                     { "sequence", value.sequence },
                     { "language", value.language },
                     { "title", value.title },
+                    { "description", value.description },
                     { "imageUrl", value.imageUrl },
                     { "createBy", value.updateBy },
                     { "createDate", DateTime.Now.toStringFromDate() },
@@ -462,7 +463,7 @@ namespace cms_api.Controllers
 
                 }
 
-                var docs = col.Find(filter).SortByDescending(o => o.docDate).ThenByDescending(o => o.updateTime).Skip(value.skip).Limit(value.limit).Project(c => new { c.code, c.title, c.language, c.imageUrl, c.createBy, c.createDate, c.isActive, c.updateDate, c.updateBy, c.sequence }).ToList();
+                var docs = col.Find(filter).SortByDescending(o => o.docDate).ThenByDescending(o => o.updateTime).Skip(value.skip).Limit(value.limit).Project(c => new { c.code,c.description, c.title, c.language, c.imageUrl, c.createBy, c.createDate, c.isActive, c.updateDate, c.updateBy, c.sequence }).ToList();
 
                 return new Response { status = "S", message = "success", jsonData = docs.ToJson(), objectData = docs, totalData = col.Find(filter).ToList().Count() };
             }
@@ -486,6 +487,7 @@ namespace cms_api.Controllers
                 doc = col.Find(filter).FirstOrDefault();
                 var model = BsonSerializer.Deserialize<object>(doc);
                 if (!string.IsNullOrEmpty(value.title)) { doc["title"] = value.title; }
+                if (!string.IsNullOrEmpty(value.description)) { doc["description"] = value.description; }
                 if (!string.IsNullOrEmpty(value.imageUrl)) { doc["imageUrl"] = value.imageUrl; }
                 if (!string.IsNullOrEmpty(value.language)) { doc["language"] = value.language; }
                 doc["sequence"] = value.sequence;

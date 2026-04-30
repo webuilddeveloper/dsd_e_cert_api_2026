@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using cms_api.Extension;
 using cms_api.Models;
@@ -23,8 +25,49 @@ namespace mobile_api.Controllers
         {
             try
             {
+                var colInterest = new Database().MongoClient<RegisterInterestModel>("registerInterest");
+                var filterInterest = Builders<RegisterInterestModel>.Filter.Eq("profileCode", value.profileCode);
+                var docsCategoryInterest = colInterest.Find(filterInterest).Project(p => new { p.trainingCategory }).ToList();
+                var interestedCodes = docsCategoryInterest.Select(s => s.trainingCategory).ToList();
+
+                var colCategory = new Database().MongoClient<Category>("trainingCategory");
+                var filterCategory = Builders<Category>.Filter.Eq(x => x.status, "A") &
+                                     Builders<Category>.Filter.In("code", interestedCodes);
+
+                var docsCategory = colCategory.Find(filterCategory).ToList();
+
                 var docs = await $"http://119.13.28.171:8888/globe/training/{value.keySearch}".HttpGet<List<TrainingModel>>();
-                return new Response { status = "S", message = "success",  objectData = docs, totalData = docs.Count };
+                if (docs == null) docs = new List<TrainingModel>();
+
+                var allKeywords = docsCategory
+                  .Where(c => !string.IsNullOrEmpty(c.description))
+                  .SelectMany(c => Regex.Split(c.description, @"[;,\s]+"))
+                  .Select(k => k.Trim().ToLower())
+                  .Where(k => !string.IsNullOrEmpty(k))
+                  .Distinct() 
+                  .ToList();
+
+                var recommendedDocs = docs.Where(course =>
+                    allKeywords.Any(key =>
+                        course.Course.ToLower().Contains(key)
+                    )
+                ).ToList();
+
+                var otherDocs = docs.Where(course =>
+                    !allKeywords.Any(key =>
+                        course.Course.ToLower().Contains(key)
+                    )
+                ).ToList();
+
+                var finalResult = recommendedDocs.Concat(otherDocs).ToList();
+
+                return new Response
+                {
+                    status = "S",
+                    message = "success",
+                    objectData = finalResult,
+                    totalData = finalResult.Count
+                };
             }
             catch (Exception ex)
             {
