@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using cms_api.Extension;
 using cms_api.Models;
 using Microsoft.AspNetCore.Mvc;
@@ -8,6 +9,7 @@ using MongoDB.Bson;
 using MongoDB.Bson.Serialization;
 using MongoDB.Driver;
 using Newtonsoft.Json;
+using static System.Net.WebRequestMethods;
 
 namespace mobile_api.Controllers
 {
@@ -15,6 +17,34 @@ namespace mobile_api.Controllers
     public class TrainingController : Controller
     {
         public TrainingController() { }
+
+        [HttpPost("readAPI")]
+        public async Task<ActionResult<Response>> ReadAPIAsync([FromBody] Criteria value)
+        {
+            try
+            {
+                var docs = await $"http://119.13.28.171:8888/globe/training/{value.keySearch}".HttpGet<List<TrainingModel>>();
+                return new Response { status = "S", message = "success",  objectData = docs, totalData = docs.Count };
+            }
+            catch (Exception ex)
+            {
+                return new Response { status = "E", message = ex.Message };
+            }
+        }
+
+        [HttpPost("readAPIPersonal")]
+        public async Task<ActionResult<Response>> ReadAPIPersonalAsync([FromBody] Criteria value)
+        {
+            try
+            {
+                var docs = await $"http://119.13.28.171:8888/globe/training_res/{value.keySearch}".HttpGet<List<PersonalTrainingModel>>();
+                return new Response { status = "S", message = "success", objectData = docs, totalData = docs.Count };
+            }
+            catch (Exception ex)
+            {
+                return new Response { status = "E", message = ex.Message };
+            }
+        }
 
         // POST /read
         [HttpPost("read")]

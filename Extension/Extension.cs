@@ -13,6 +13,7 @@ using MongoDB.Bson.Serialization;
 using MongoDB.Driver;
 using Newtonsoft.Json;
 
+
 namespace cms_api.Extension
 {
     public static class Extension
@@ -1495,6 +1496,32 @@ namespace cms_api.Extension
                     break;
             }
             return name;
+        }
+
+        private static readonly HttpClient client = new HttpClient();
+        public static async Task<T> HttpGet<T>(this string pathUrl) where T : class, new()
+        {
+            try
+            {
+                var response = await client.GetAsync(pathUrl);
+
+                if (response.IsSuccessStatusCode)
+                {
+                    string jsonString = await response.Content.ReadAsStringAsync();
+                    T result = JsonConvert.DeserializeObject<T>(jsonString);
+
+                    return result ?? new T();
+                }
+                else
+                {
+                    return new T();
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Exception: {ex.Message}");
+                return new T();
+            }
         }
     }
 }

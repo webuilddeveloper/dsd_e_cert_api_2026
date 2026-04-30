@@ -10,6 +10,7 @@ using cms_api.Models;
 using Jose;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
+using Microsoft.VisualBasic;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization;
 using MongoDB.Driver;
@@ -26,7 +27,7 @@ namespace mobile_api.Controllers
 
         // POST /create
         [HttpPost("create")]
-        public ActionResult<Response> Create([FromBody] Register value)
+        public async Task<ActionResult<Response>> CreateAsync([FromBody] Register value)
         {
             value.code = "".toCode();
             var doc = new BsonDocument();
@@ -78,6 +79,8 @@ namespace mobile_api.Controllers
                         }
                     }
 
+                    var isCert = await $"http://119.13.28.171:8888/tpqi/user_profiles/{value.idcard}".HttpGet<List<CertificateModel>>();
+
                     doc = new BsonDocument
                     {
                         { "code", value.code },
@@ -120,6 +123,7 @@ namespace mobile_api.Controllers
                         { "postno", value.postno },
                         //{ "job", value.job },
                         { "idcard", value.idcard },
+                        { "isCert", isCert.Count > 0 ? true : false },
                         //{ "officerCode", value.officerCode },
                         //{ "countUnit", value.countUnit },
                         //{ "lv0", value.lv0 },
@@ -341,13 +345,15 @@ namespace mobile_api.Controllers
                     c.lv3,
                     c.lv4,
                     c.linkAccount,
-                    c.appleID
+                    c.appleID,
+                    c.isCert,
+                    c.isInterest,
 
                 }).ToList();
 
                 //var list = new List<object>();
                 //docs.ForEach(doc => { list.Add(BsonSerializer.Deserialize<object>(doc)); });
-                return new Response { status = "S", message = "success", jsonData = docs.ToJson(), objectData = docs, totalData = col.Find(filter).ToList().Count() };
+                return new Response { status = "S", message = "success",  objectData = docs, totalData = col.Find(filter).ToList().Count() };
             }
             catch (Exception ex)
             {
@@ -358,7 +364,7 @@ namespace mobile_api.Controllers
 
         // POST /update
         [HttpPost("update")]
-        public ActionResult<Response> Update([FromBody] Register value)
+        public async Task<ActionResult<Response>> UpdateAsync([FromBody] Register value)
         {
             var doc = new BsonDocument();
             try
@@ -493,6 +499,10 @@ namespace mobile_api.Controllers
                     doc["appleID"] = value.appleID;
 
                     doc["imageUrl"] = value.imageUrl;
+
+                    var isCert = await $"http://119.13.28.171:8888/tpqi/user_profiles/{value.idcard}".HttpGet<List<CertificateModel>>();
+                    doc["isCert"] = isCert.Count > 0 ? true : false;
+
                     col.ReplaceOne(filter, doc);
                 }
                 else if (!string.IsNullOrEmpty(value.linkAccount))
@@ -521,7 +531,7 @@ namespace mobile_api.Controllers
                     };
                     col1.InsertOne(doc1);
 
-
+                    var isCert = await $"http://119.13.28.171:8888/tpqi/user_profiles/{value.idcard}".HttpGet<List<CertificateModel>>();
                     var updatePermission = Builders<BsonDocument>.Update
                     .Set("imageUrl", value.imageUrl)
                     .Set("prefixName", value.prefixName)
@@ -562,6 +572,7 @@ namespace mobile_api.Controllers
                     .Set("status", value.status)
                     .Set("updateBy", value.updateBy)
                     .Set("appleID", value.appleID)
+                    .Set("isCert", isCert.Count > 0 ? true : false)
                     .Set("updateDate", DateTime.Now.toStringFromDate());
                     collectionPermission.UpdateMany(filterPermission, updatePermission);
 
@@ -629,7 +640,7 @@ namespace mobile_api.Controllers
                 //END :read <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
 
-                return new Response { status = "S", message = "success", jsonData = registerDoc.ToJson(), objectData = registerDoc };
+                return new Response { status = "S", message = "success",  objectData = registerDoc };
             }
             catch (Exception ex)
             {
@@ -2962,7 +2973,107 @@ namespace mobile_api.Controllers
             }
         }
 
-        #endregion      
+        #endregion
 
+        [HttpPost("GetCret")]
+        public async Task<ActionResult<Response>> GetCretAsync([FromBody] Register value)
+        {
+            try
+            {
+                var docs = await $"http://119.13.28.171:8888/tpqi/user_profiles/{value.idcard}".HttpGet<List<CertificateModel>>();
+
+                return new Response { status = "S", message = "success",objectData = docs, totalData = docs.Count };
+            }
+            catch (Exception ex)
+            {
+                return new Response { status = "E", message = ex.Message };
+            }
+        }
+
+        [HttpPost("CraterInterest")]
+        public async Task<ActionResult<Response>> CraterInterest([FromBody] RegisterInterest value)
+        {
+            var doc = new BsonDocument();
+            try
+            {
+                var col = new Database().MongoClient("registerInterest");
+
+                {
+                    var colRegister = new Database().MongoClient("register");
+                    var filterRegister = Builders<BsonDocument>.Filter.Eq("code", value.profileCode) & Builders<BsonDocument>.Filter.Ne("isInterest", true);
+                    if (colRegister.Find(filterRegister).Any())
+                    {
+                        var update = Builders<BsonDocument>.Update.Set("isInterest", true).Set("updateBy", value.updateBy).Set("updateDate", DateTime.Now.toStringFromDate()).Set("updateTime", DateTime.Now.toTimeStringFromDate());
+                        colRegister.UpdateMany(filterRegister, update);
+                    }
+                }
+
+                foreach (var item in value.trainingCategory)
+                {
+
+                    var filter = Builders<BsonDocument>.Filter.Eq("profileCode", value.profileCode) & Builders<BsonDocument>.Filter.Eq("trainingCategory", item.code);
+                    if (col.Find(filter).Any())
+                    {
+                        doc = col.Find(filter).FirstOrDefault();
+                        var model = BsonSerializer.Deserialize<object>(doc);
+
+                        doc["updateBy"] = value.updateBy;
+                        doc["updateDate"] = DateTime.Now.toStringFromDate();
+                        doc["updateTime"] = DateTime.Now.toTimeStringFromDate();
+                        doc["isActive"] = item.isActive;
+                        col.ReplaceOne(filter, doc);
+                    }
+                    else
+                    {
+                        doc = new BsonDocument
+                        {
+                            { "code", "".toCode() },
+                            { "profileCode", value.profileCode },
+                            { "trainingCategory", item.code },
+                            { "isActive", item.isActive },
+
+                            { "docDate", DateTime.Now.Date.AddHours(7) },
+                            { "docTime", DateTime.Now.toTimeStringFromDate() },
+                            { "createBy", value.updateBy },
+                            { "createDate", DateTime.Now.toStringFromDate() },
+                            { "createTime", DateTime.Now.toTimeStringFromDate() },
+                            { "updateBy", value.updateBy },
+                            { "updateDate", DateTime.Now.toStringFromDate() },
+                            { "updateTime", DateTime.Now.toTimeStringFromDate() },
+
+                        };
+
+                        col.InsertOne(doc);
+                    }
+
+                }
+
+                return new Response { status = "S", message = "success" };
+            }
+            catch (Exception ex)
+            {
+                return new Response { status = "E", message = ex.Message };
+            }
+        }
+
+        [HttpPost("readInterest")]
+        public async Task<ActionResult<Response>> ReadInterest([FromBody] RegisterInterest value)
+        {
+            var doc = new BsonDocument();
+            try
+            {
+                var col = new Database().MongoClient<RegisterInterestModel>("registerInterest");
+
+                var filter = Builders<RegisterInterestModel>.Filter.Eq("profileCode", value.profileCode) & Builders<RegisterInterestModel>.Filter.Eq("isActive", true); ;
+
+                var docs = col.Find(filter).Project(p => new {p.code,p.profileCode,p.trainingCategory,p.isActive,p.createBy,p.createDate,p.createTime,p.updateBy,p.updateDate,p.updateTime,p.docDate,p.docTime}).ToList();
+
+                return new Response { status = "S", message = "success",objectData= docs,totalData = docs.Count };
+            }
+            catch (Exception ex)
+            {
+                return new Response { status = "E", message = ex.Message };
+            }
+        }
     }
 }

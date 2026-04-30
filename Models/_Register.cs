@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
+using Newtonsoft.Json;
 
 namespace cms_api.Models
 {
@@ -96,6 +98,9 @@ namespace cms_api.Models
         public string laserID { get; set; }
         public string lasercode { get; set; }
         public string lasernum { get; set; }
+
+        public bool isCert { get; set; }
+        public bool isInterest { get; set; }
     }
     public class Register1 : BlankIdentity
     {
@@ -183,5 +188,48 @@ namespace cms_api.Models
         public string postnoCode { get { return ""; } set { } }
 
         public string linkAccount { get { return ""; } set { } }
+    }
+
+    public class CertificateModel
+    {
+        [JsonProperty("PERSONAL_ID")]
+        public string PersonalId { get; set; }
+
+        [JsonProperty("NAMES")]
+        public string Names { get; set; }
+
+        [JsonProperty("COURSE")]
+        public string Course { get; set; }
+
+        [JsonProperty("CERTIFICATE_NO")]
+        public string CertificateNo { get; set; }
+
+        [JsonProperty("CERTIFICATE_DATE")]
+        public DateTime? CertificateDate { get; set; }
+
+        [JsonProperty("SITE")]
+        public string Site { get; set; }
+
+        [JsonProperty("TYPEOFTRAIN")]
+        public string TypeOfTrain { get; set; }
+
+        [JsonProperty("CER_EXPIRE")]
+        public DateTime? CerExpire { get; set; }
+    }
+
+    public class RegisterInterest : Identity
+    {
+        public List<Interest> trainingCategory { get; set; }
+    }
+
+    public class Interest
+    {
+        public string code { get; set; }
+        public bool isActive { get; set; }
+    }
+
+    public class RegisterInterestModel : Identity
+    {
+        public string trainingCategory { get; set; }
     }
 }
