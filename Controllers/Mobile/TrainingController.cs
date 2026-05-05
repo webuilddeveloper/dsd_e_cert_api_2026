@@ -20,54 +20,51 @@ namespace mobile_api.Controllers
     {
         public TrainingController() { }
 
+
         [HttpPost("readAPI")]
         public async Task<ActionResult<Response>> ReadAPIAsync([FromBody] Criteria value)
         {
             try
             {
-                var colInterest = new Database().MongoClient<RegisterInterestModel>("registerInterest");
-                var filterInterest = Builders<RegisterInterestModel>.Filter.Eq("profileCode", value.profileCode);
-                var docsCategoryInterest = colInterest.Find(filterInterest).Project(p => new { p.trainingCategory }).ToList();
-                var interestedCodes = docsCategoryInterest.Select(s => s.trainingCategory).ToList();
+                List<TrainingModel> docs = new List<TrainingModel>();
 
-                var colCategory = new Database().MongoClient<Category>("trainingCategory");
-                var filterCategory = Builders<Category>.Filter.Eq(x => x.status, "A") &
-                                     Builders<Category>.Filter.In("code", interestedCodes);
-
-                var docsCategory = colCategory.Find(filterCategory).ToList();
-
-                var docs = await $"http://119.13.28.171:8888/globe/training/{value.keySearch}".HttpGet<List<TrainingModel>>();
+                docs = await $"http://119.13.28.171:8888/globe/training/{value.keySearch}".HttpGet<List<TrainingModel>>();
                 if (docs == null) docs = new List<TrainingModel>();
 
-                var allKeywords = docsCategory
-                  .Where(c => !string.IsNullOrEmpty(c.description))
-                  .SelectMany(c => Regex.Split(c.description, @"[;,\s]+"))
-                  .Select(k => k.Trim().ToLower())
-                  .Where(k => !string.IsNullOrEmpty(k))
-                  .Distinct() 
-                  .ToList();
+                var colCategory = new Database().MongoClient<Category>("trainingCategory");
+                var filterCategory = Builders<Category>.Filter.Eq(x => x.status, "A");
+                var allCategoryList = colCategory.Find(filterCategory).ToList();
 
-                var recommendedDocs = docs.Where(course =>
-                    allKeywords.Any(key =>
-                        course.Course.ToLower().Contains(key)
-                    )
-                ).ToList();
-
-                var otherDocs = docs.Where(course =>
-                    !allKeywords.Any(key =>
-                        course.Course.ToLower().Contains(key)
-                    )
-                ).ToList();
-
-                var finalResult = recommendedDocs.Concat(otherDocs).ToList();
-
-                return new Response
+                if (!string.IsNullOrEmpty(value.category))
                 {
-                    status = "S",
-                    message = "success",
-                    objectData = finalResult,
-                    totalData = finalResult.Count
-                };
+                    var selectedCat = allCategoryList.FirstOrDefault(x => x.code == value.category);
+                    if (selectedCat != null && !string.IsNullOrEmpty(selectedCat.description))
+                    {
+                        var keys = Regex.Split(selectedCat.description, @"[;,\s]+").Select(k => k.Trim().ToLower()).ToList();
+                        docs = docs.Where(c => keys.Any(k => c.Course.ToLower().Contains(k))).ToList();
+                    }
+                }
+
+                if (!string.IsNullOrEmpty(value.profileCode))
+                {
+                    var colInterest = new Database().MongoClient<RegisterInterestModel>("registerInterest");
+                    var interestedCodes = colInterest.Find(x => x.profileCode == value.profileCode)
+                                                    .Project(p => p.trainingCategory).ToList();
+
+                    var userKeywords = allCategoryList
+                        .Where(c => interestedCodes.Contains(c.code) && !string.IsNullOrEmpty(c.description))
+                        .SelectMany(c => Regex.Split(c.description, @"[;,\s]+"))
+                        .Select(k => k.Trim().ToLower()).Distinct().ToList();
+
+                    if (userKeywords.Any())
+                    {
+                        var recommended = docs.Where(c => userKeywords.Any(k => c.Course.ToLower().Contains(k))).ToList();
+                        var others = docs.Where(c => !userKeywords.Any(k => c.Course.ToLower().Contains(k))).ToList();
+                        docs = recommended.Concat(others).ToList();
+                    }
+                }
+
+                return new Response { status = "S", message = "success", objectData = docs, totalData = docs.Count };
             }
             catch (Exception ex)
             {
