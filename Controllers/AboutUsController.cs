@@ -55,7 +55,8 @@ namespace cms_api.Controllers
                     { "docDate", DateTime.Now.AddHours(7) },
                     { "docTime", DateTime.Now.toTimeStringFromDate() },
                     { "isActive", true },
-                    { "lineOfficial", value.lineOfficial }
+                    { "lineOfficial", value.lineOfficial },
+                    { "policyUrl", value.policyUrl }
                 };
                 col.InsertOne(doc);
 
@@ -75,7 +76,7 @@ namespace cms_api.Controllers
             {
                 var col = new Database().MongoClient<AboutUs>("aboutUs");
                 var filter = Builders<AboutUs>.Filter.Eq("code", "1");
-                var docs = col.Find(filter).Project(c => new { c.code, c.isActive, c.title, c.imageLogoUrl, c.imageBgUrl, c.description, c.latitude, c.email, c.site, c.longitude, c.address, c.facebook, c.youtube, c.telephone, c.createBy, c.createDate, c.updateBy, c.updateDate, c.lineOfficial }).ToList();
+                var docs = col.Find(filter).Project(c => new { c.code, c.isActive, c.title, c.imageLogoUrl, c.imageBgUrl, c.description, c.latitude, c.email, c.site, c.longitude, c.address, c.facebook, c.youtube, c.telephone, c.createBy, c.createDate, c.updateBy, c.updateDate, c.lineOfficial,c.policyUrl }).ToList();
                 return new Response { status = "S", message = "success", jsonData = docs.ToJson(), objectData = docs };
             }
             catch (Exception ex)
@@ -112,6 +113,7 @@ namespace cms_api.Controllers
                     if (!string.IsNullOrEmpty(value.site)) { doc["site"] = value.site; }
                     if (!string.IsNullOrEmpty(value.updateBy)) { doc["updateBy"] = value.updateBy; }
                     if (!string.IsNullOrEmpty(value.lineOfficial)) { doc["lineOfficial"] = value.lineOfficial; }
+                    if (!string.IsNullOrEmpty(value.policyUrl)) { doc["policyUrl"] = value.policyUrl; }
                     doc["updateDate"] = DateTime.Now.toStringFromDate();
                     doc["updateTime"] = DateTime.Now.toTimeStringFromDate();
                     col.ReplaceOne(filter, doc);
@@ -137,7 +139,8 @@ namespace cms_api.Controllers
                         { "docDate", DateTime.Now },
                         { "docTime", DateTime.Now.toTimeStringFromDate() },
                         { "isActive", true },
-                        { "lineOfficial", value.lineOfficial }
+                        { "lineOfficial", value.lineOfficial },
+                        { "policyUrl", value.policyUrl },
                     };
                     col.InsertOne(doc);
                 }

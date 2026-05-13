@@ -16,6 +16,7 @@ namespace cms_api.Models
             latitude = "";
             longitude = "";
             lineOfficial = "";
+            policyUrl = "";
         }
 
         public string imageLogoUrl { get; set; }
@@ -29,5 +30,6 @@ namespace cms_api.Models
         public string latitude { get; set; }
         public string longitude { get; set; }
         public string lineOfficial { get; set; }
+        public string policyUrl { get; set; }
     }
 }
