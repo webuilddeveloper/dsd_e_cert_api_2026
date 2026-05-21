@@ -53,14 +53,17 @@ namespace cms_api.Controllers
                 {
                     { "code", value.code },
                     { "sequence", value.sequence },
-                    { "title", value.title },
+                    { "title", value.title }, 
+                    { "description", value.description }, 
+                    { "titleEN", value.titleEN },
+                    { "descriptionEN", value.descriptionEN },
                     { "imageUrl", value.imageUrl },
                     { "category", value.category },
                     { "language", value.language },
-                    { "description", value.description },
                     { "fileUrl", value.fileUrl},
                     { "linkUrl", value.linkUrl},
                     { "textButton", value.textButton},
+                    { "textButtonEN", value.textButtonEN},
                     { "imageUrlCreateBy", value.imageUrlCreateBy },
                     { "createBy", value.updateBy },
                     { "createDate", DateTime.Now.toStringFromDate() },
@@ -176,11 +179,15 @@ namespace cms_api.Controllers
 
                 doc = col.Find(filter).FirstOrDefault();
                 var model = BsonSerializer.Deserialize<object>(doc);
-                if (!string.IsNullOrEmpty(value.title)) { doc["title"] = value.title; }
+                if (!string.IsNullOrEmpty(value.title)) { doc["title"] = value.title; } 
+                if (!string.IsNullOrEmpty(value.title)) { doc["titleEN"] = value.titleEN; }
                 if (!string.IsNullOrEmpty(value.category)) { doc["category"] = value.category; }
                 if (!string.IsNullOrEmpty(value.language)) { doc["language"] = value.language; }
                 if (!string.IsNullOrEmpty(value.imageUrl)) { doc["imageUrl"] = value.imageUrl; }
                 if (!string.IsNullOrEmpty(value.description)) { doc["description"] = value.description; }
+                if (!string.IsNullOrEmpty(value.description)) { doc["descriptionEN"] = value.descriptionEN; } 
+                if (!string.IsNullOrEmpty(value.textButton)) { doc["textButtonEN"] = value.textButtonEN; }
+
 
                 doc["fileUrl"] = value.fileUrl;
                 doc["linkUrl"] = value.linkUrl;
@@ -503,6 +510,7 @@ namespace cms_api.Controllers
                     { "sequence", value.sequence },
                     { "language", value.language },
                     { "title", value.title },
+                    { "titleEN", value.titleEN },
                     { "imageUrl", value.imageUrl },
                     { "createBy", value.updateBy },
                     { "createDate", DateTime.Now.toStringFromDate() },
@@ -552,7 +560,6 @@ namespace cms_api.Controllers
                     if (!string.IsNullOrEmpty(value.code)) { filter = filter & Builders<Category>.Filter.Eq("code", value.code); }
                     if (!string.IsNullOrEmpty(value.description)) { filter = filter & Builders<Category>.Filter.Regex("description", new BsonRegularExpression(string.Format(".*{0}.*", value.description), "i")); }
                     if (!string.IsNullOrEmpty(value.language)) { filter = filter & Builders<Category>.Filter.Regex("language", value.language); }
-
                     var ds = value.startDate.toDateFromString().toBetweenDate();
                     var de = value.endDate.toDateFromString().toBetweenDate();
                     if (value.startDate != "Invalid date" && value.endDate != "Invalid date" && !string.IsNullOrEmpty(value.startDate) && !string.IsNullOrEmpty(value.endDate)) { filter = filter & Builders<Category>.Filter.Gt("docDate", ds.start) & Builders<Category>.Filter.Lt("docDate", de.end); }
@@ -561,7 +568,7 @@ namespace cms_api.Controllers
 
                 }
 
-                var docs = col.Find(filter).SortByDescending(o => o.docDate).ThenByDescending(o => o.updateTime).Skip(value.skip).Limit(value.limit).Project(c => new { c.code, c.title, c.language, c.imageUrl, c.createBy, c.createDate, c.isActive, c.updateBy, c.updateDate, c.sequence }).ToList();
+                var docs = col.Find(filter).SortByDescending(o => o.docDate).ThenByDescending(o => o.updateTime).Skip(value.skip).Limit(value.limit).Project(c => new { c.code, c.title , c.titleEN, c.language, c.imageUrl, c.createBy, c.createDate, c.isActive, c.updateBy, c.updateDate, c.sequence ,}).ToList();
 
                 return new Response { status = "S", message = "success", jsonData = docs.ToJson(), objectData = docs, totalData = col.Find(filter).ToList().Count() };
             }
@@ -583,8 +590,9 @@ namespace cms_api.Controllers
 
                 var filter = Builders<BsonDocument>.Filter.Eq("code", value.code);
                 doc = col.Find(filter).FirstOrDefault();
-                var model = BsonSerializer.Deserialize<object>(doc);
+                // var model = BsonSerializer.Deserialize<object>(doc);
                 if (!string.IsNullOrEmpty(value.title)) { doc["title"] = value.title; }
+                if (!string.IsNullOrEmpty(value.titleEN)) { doc["titleEN"] = value.titleEN; }
                 if (!string.IsNullOrEmpty(value.imageUrl)) { doc["imageUrl"] = value.imageUrl; }
                 if (!string.IsNullOrEmpty(value.language)) { doc["language"] = value.language; }
                 doc["sequence"] = value.sequence;
@@ -629,9 +637,15 @@ namespace cms_api.Controllers
         {
             try
             {
+                var codeList = value.code.Split(",");
+
+                foreach (var code in codeList)
+                {
+
+
                 var col = new Database().MongoClient( "newsCategory");
 
-                var filter = Builders<BsonDocument>.Filter.Eq("code", value.code);
+                var filter = Builders<BsonDocument>.Filter.Eq("code", code);
                 var update = Builders<BsonDocument>.Update.Set("status", "D").Set("updateBy", value.updateBy).Set("updateDate", DateTime.Now.toStringFromDate());
                 col.UpdateOne(filter, update);
 
@@ -639,7 +653,7 @@ namespace cms_api.Controllers
                 if (!value.isActive)
                 {
                     var collectionContent = new Database().MongoClient("news");
-                    var filterContent = Builders<BsonDocument>.Filter.Eq("category", value.code);
+                    var filterContent = Builders<BsonDocument>.Filter.Eq("category", code);
                     var updateContent = Builders<BsonDocument>.Update.Set("isActive", false).Set("status", "D");
                     collectionContent.UpdateMany(filterContent, updateContent);
                 }
@@ -649,10 +663,12 @@ namespace cms_api.Controllers
                 if (!value.isActive)
                 {
                     var collectionPermission = new Database().MongoClient("registerPermission");
-                    var filterPermission = Builders<BsonDocument>.Filter.Eq("category", value.code);
+                    var filterPermission = Builders<BsonDocument>.Filter.Eq("category", code);
                     var updatePermission = Builders<BsonDocument>.Update.Set("newsPage", false).Set("isActive", false);
                     collectionPermission.UpdateMany(filterPermission, updatePermission);
                 }
+                }
+
                 // ------- end ------
 
                 return new Response { status = "S", message = $"code: {value.code} is delete" };

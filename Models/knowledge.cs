@@ -12,6 +12,8 @@ namespace cms_api.Models
             imageUrlCreateBy = "";
             author = "";
             publisher = "";
+             authorEN = "";
+            publisherEN = "";
             bookType = "";
             numberOfPages = 0;
             size = "";
@@ -24,6 +26,8 @@ namespace cms_api.Models
         public string imageUrlCreateBy { get; set; }
         public string author { get; set; }
         public string publisher { get; set; }
+        public string authorEN { get; set; }
+        public string publisherEN { get; set; }
         public string bookType { get; set; }
         public int numberOfPages { get; set; }
         public string size { get; set; }

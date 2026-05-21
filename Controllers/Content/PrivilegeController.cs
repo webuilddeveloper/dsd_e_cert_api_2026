@@ -54,14 +54,17 @@ namespace cms_api.Controllers
                 {
                     { "code", value.code },
                     { "title", value.title },
+                    { "titleEN", value.titleEN },
                     { "sequence", value.sequence },
                     { "imageUrl", value.imageUrl },
                     { "category", value.category },
                     { "language", value.language },
                     { "description", value.description},
+                    { "descriptionEN", value.descriptionEN},
                     { "fileUrl", value.fileUrl},
                     { "linkUrl", value.linkUrl},
-                    { "textButton", value.textButton},
+                    { "textButton", value.textButton}, 
+                    { "textButtonEN", value.textButtonEN},
                     { "dateStart", value.dateStart},
                     { "dateEnd", value.dateEnd},
                     { "receive", value.receive},
@@ -180,15 +183,19 @@ namespace cms_api.Controllers
                 doc = col.Find(filter).FirstOrDefault();
                 var model = BsonSerializer.Deserialize<object>(doc);
                 if (!string.IsNullOrEmpty(value.title)) { doc["title"] = value.title; }
+                if (!string.IsNullOrEmpty(value.titleEN)) { doc["titleEN"] = value.titleEN; }
                 if (!string.IsNullOrEmpty(value.imageUrl)) { doc["imageUrl"] = value.imageUrl; }
                 if (!string.IsNullOrEmpty(value.category)) { doc["category"] = value.category; }
                 if (!string.IsNullOrEmpty(value.language)) { doc["language"] = value.language; }
                 if (!string.IsNullOrEmpty(value.description)) { doc["description"] = value.description; }
+                if (!string.IsNullOrEmpty(value.descriptionEN)) { doc["descriptionEN"] = value.descriptionEN; }
                 if (!string.IsNullOrEmpty(value.linkUrl)) { doc["linkUrl"] = value.linkUrl; }
                 if (!string.IsNullOrEmpty(value.textButton)) { doc["textButton"] = value.textButton; }
+                if (!string.IsNullOrEmpty(value.textButtonEN)) { doc["textButtonEN"] = value.textButtonEN; }
                 if (!string.IsNullOrEmpty(value.dateStart)) { doc["dateStart"] = value.dateStart; }
                 if (!string.IsNullOrEmpty(value.dateEnd)) { doc["dateEnd"] = value.dateEnd; }
                 if (!string.IsNullOrEmpty(value.updateBy)) { doc["updateBy"] = value.updateBy; }
+              
 
                 doc["fileUrl"] = value.fileUrl;
                 doc["linkUrl"] = value.linkUrl;
@@ -348,7 +355,8 @@ namespace cms_api.Controllers
                     { "code", value.code },
                     { "sequence", value.sequence},
                     { "language", value.language },
-                    { "title", value.title },
+                    { "title", value.title }, 
+                    { "titleEN", value.titleEN },
                     { "imageUrl", value.imageUrl },
                     { "createBy", value.updateBy },
                     { "createDate", DateTime.Now.toStringFromDate() },
@@ -408,7 +416,7 @@ namespace cms_api.Controllers
                     
                 }
 
-                var docs = col.Find(filter).SortByDescending(o => o.docDate).ThenByDescending(o => o.updateTime).Skip(value.skip).Limit(value.limit).Project(c => new { c.code, c.title, c.language, c.imageUrl, c.createBy, c.createDate, c.isActive, c.updateDate, c.updateBy, c.sequence }).ToList();
+                var docs = col.Find(filter).SortByDescending(o => o.docDate).ThenByDescending(o => o.updateTime).Skip(value.skip).Limit(value.limit).Project(c => new { c.code, c.title, c.titleEN, c.language, c.imageUrl, c.createBy, c.createDate, c.isActive, c.updateDate, c.updateBy, c.sequence }).ToList();
 
                 return new Response { status = "S", message = "success", jsonData = docs.ToJson(), objectData = docs, totalData = col.Find(filter).ToList().Count() };
             }
@@ -432,6 +440,7 @@ namespace cms_api.Controllers
                 doc = col.Find(filter).FirstOrDefault();
                 var model = BsonSerializer.Deserialize<object>(doc);
                 if (!string.IsNullOrEmpty(value.title)) { doc["title"] = value.title; }
+                if (!string.IsNullOrEmpty(value.title)) { doc["titleEN"] = value.titleEN; }
                 if (!string.IsNullOrEmpty(value.imageUrl)) { doc["imageUrl"] = value.imageUrl; }
                 if (!string.IsNullOrEmpty(value.language)) { doc["language"] = value.language; }
                 doc["sequence"] = value.sequence;
@@ -476,9 +485,12 @@ namespace cms_api.Controllers
         {
             try
             {
+                 var codeList = value.code.Split(",");
+                foreach (var code in codeList)
+                {
                 var col = new Database().MongoClient( "privilegeCategory");
 
-                var filter = Builders<BsonDocument>.Filter.Eq("code", value.code);
+                var filter = Builders<BsonDocument>.Filter.Eq("code", code);
                 var update = Builders<BsonDocument>.Update.Set("status", "D").Set("updateBy", value.updateBy).Set("updateDate", DateTime.Now.toStringFromDate());
                 col.UpdateOne(filter, update);
 
@@ -486,7 +498,7 @@ namespace cms_api.Controllers
                 if (!value.isActive)
                 {
                     var collectionContent = new Database().MongoClient("privilege");
-                    var filterContent = Builders<BsonDocument>.Filter.Eq("category", value.code);
+                    var filterContent = Builders<BsonDocument>.Filter.Eq("category", code);
                     var updateContent = Builders<BsonDocument>.Update.Set("isActive", false).Set("status", "D");
                     collectionContent.UpdateMany(filterContent, updateContent);
                 }
@@ -496,9 +508,10 @@ namespace cms_api.Controllers
                 if (!value.isActive)
                 {
                     var collectionPermission = new Database().MongoClient("registerPermission");
-                    var filterPermission = Builders<BsonDocument>.Filter.Eq("category", value.code);
+                    var filterPermission = Builders<BsonDocument>.Filter.Eq("category", code);
                     var updatePermission = Builders<BsonDocument>.Update.Set("privilegePage", false).Set("isActive", false);
                     collectionPermission.UpdateMany(filterPermission, updatePermission);
+                }
                 }
                 // ------- end ------
 

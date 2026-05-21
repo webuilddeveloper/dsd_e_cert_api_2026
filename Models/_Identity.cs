@@ -72,6 +72,7 @@ namespace cms_api.Models
 
             linkUrl = "";
             textButton = "";
+            textButtonEN= "";
             action = "";
             fileUrl = "";
             platform = "";
@@ -162,7 +163,8 @@ namespace cms_api.Models
 
         public string fileUrl { get; set; }
         public string linkUrl { get; set; }
-        public string textButton { get; set; }
+        public string textButton { get; set; } 
+         public string textButtonEN { get; set; }
         public string action { get; set; }
         public string platform { get; set; }
     }
@@ -233,7 +235,8 @@ namespace cms_api.Models
             organizationMode = "";
 
             linkUrl = "";
-            textButton = "";
+            textButton = ""; 
+            textButtonEN = "";
             action = "";
             fileUrl = "";
             platform = "";
@@ -321,6 +324,7 @@ namespace cms_api.Models
         public string fileUrl { get { return ""; } set { } }
         public string linkUrl { get { return ""; } set { } }
         public string textButton { get { return ""; } set { } }
+        public string textButtonEN { get { return ""; } set { } }
         public string action { get { return ""; } set { } }
         public string platform { get { return ""; } set { } }
     }
