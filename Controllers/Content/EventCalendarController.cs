@@ -205,7 +205,7 @@ namespace cms_api.Controllers
                 if (!string.IsNullOrEmpty(value.dateStart)) { doc["dateStart"] = value.dateStart; }
                 if (!string.IsNullOrEmpty(value.updateBy)) { doc["updateBy"] = value.updateBy; }
                 if (!string.IsNullOrEmpty(value.agency)) { doc["agency"] = value.agency; }
-                if (!string.IsNullOrEmpty(value.textButtonEN)) { doc["textButton"] = value.textButtonEN; }
+                if (!string.IsNullOrEmpty(value.textButtonEN)) { doc["textButtonEN"] = value.textButtonEN; }
 
 
                 doc["fileUrl"] = value.fileUrl;
