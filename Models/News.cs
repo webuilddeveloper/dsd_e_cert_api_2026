@@ -15,6 +15,7 @@ namespace cms_api.Models
             view = 0;
             totalLv = 0;
             isRead = false;
+            linkdsd = "";
         }
 
         public string imageUrl { get; set; }
@@ -22,5 +23,6 @@ namespace cms_api.Models
         public int view { get; set; }
         public int totalLv { get; set; }
         public bool isRead { get; set; }
+        public string linkdsd { get; set; }
     }
 }
