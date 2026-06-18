@@ -349,7 +349,7 @@ def extract_news(news_url: str, cat: dict, col) -> dict | None:
             "updateBy":         "dsd_scraper",
             "updateDate":       str(create_date),
             "updateTime":       str(create_time),
-            "docDate":          str(doc_date),
+            "docDate":          doc_date,
             "docTime":          str(create_time),
             "isActive":         True,
             "isHighlight":      False,
