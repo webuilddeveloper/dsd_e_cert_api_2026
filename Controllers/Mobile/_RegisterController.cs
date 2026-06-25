@@ -63,21 +63,21 @@ namespace mobile_api.Controllers
                             return new Response { status = "E", message = $"username: {value.username} is exist", jsonData = value.ToJson(), objectData = value };
                         }
                     }
-                    {
-                        var filter = Builders<BsonDocument>.Filter.Eq("email", value.email) & Builders<BsonDocument>.Filter.Eq("category", value.category) & Builders<BsonDocument>.Filter.Ne("status", "D");
-                        if (col.Find(filter).Any())
-                        {
-                            return new Response { status = "E", message = $"email: {value.email} is exist", jsonData = value.ToJson(), objectData = value };
-                        }
-                    }
+                    //{
+                    //    var filter = Builders<BsonDocument>.Filter.Eq("email", value.email) & Builders<BsonDocument>.Filter.Eq("category", value.category) & Builders<BsonDocument>.Filter.Ne("status", "D");
+                    //    if (col.Find(filter).Any())
+                    //    {
+                    //        return new Response { status = "E", message = $"email: {value.email} is exist", jsonData = value.ToJson(), objectData = value };
+                    //    }
+                    //}
 
-                    {
-                        var filter = Builders<BsonDocument>.Filter.Eq("idcard", value.idcard) & Builders<BsonDocument>.Filter.Eq("category", value.category) & Builders<BsonDocument>.Filter.Ne("status", "D");
-                        if (col.Find(filter).Any())
-                        {
-                            return new Response { status = "E", message = $"idcard: {value.idcard} is exist", jsonData = value.ToJson(), objectData = value };
-                        }
-                    }
+                    //{
+                    //    var filter = Builders<BsonDocument>.Filter.Eq("idcard", value.idcard) & Builders<BsonDocument>.Filter.Eq("category", value.category) & Builders<BsonDocument>.Filter.Ne("status", "D");
+                    //    if (col.Find(filter).Any())
+                    //    {
+                    //        return new Response { status = "E", message = $"idcard: {value.idcard} is exist", jsonData = value.ToJson(), objectData = value };
+                    //    }
+                    //}
 
                     var isCert = await $"http://119.13.28.171:8888/tpqi/user_profiles/{value.idcard}".HttpGet<List<CertificateModel>>();
 
@@ -255,6 +255,11 @@ namespace mobile_api.Controllers
         {
             try
             {
+                if (string.IsNullOrEmpty(value.code))
+                {
+                    return new Response { status = "E", message = "code not found" };
+                }
+
                 var col = new Database().MongoClient<Register>("register");
                 //var filter = (Builders<Register>.Filter.Eq(x => x.isActive, true || false));
                 //&value.filterOrganization<Register>()
