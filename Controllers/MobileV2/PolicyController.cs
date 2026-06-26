@@ -10,7 +10,7 @@ using MongoDB.Driver;
 
 namespace mobilev2_api.Controllers
 {
-    [Route("m/[controller]")]
+    [Route("m/V2/[controller]")]
     public class PolicyController : Controller
     {
 
@@ -71,7 +71,7 @@ namespace mobilev2_api.Controllers
                 var filterRegister = Builders<Register>.Filter.Ne(x => x.status, "D") & Builders<Register>.Filter.Eq("code", value.profileCode);
                 var docRegister = colRegister.Find(filterRegister).Project(c => new { c.code, c.username, c.password, c.category, c.imageUrl, c.firstName, c.lastName }).FirstOrDefault();
 
-                value.statisticsCreate("policy");
+                //value.statisticsCreate("policy");
                 var docs = new List<Policy>();
                 var col = new Database().MongoClient<Policy>("policy");
                 var filter = Builders<Policy>.Filter.Eq("status", "A");

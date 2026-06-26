@@ -66,7 +66,7 @@ namespace mobile_api.Controllers
         {
             try
             {
-                value.statisticsCreate("policy");
+                //value.statisticsCreate("policy");
                 var docs = new List<Policy>();
                 var col = new Database().MongoClient<Policy>("policy");
                 var filter = Builders<Policy>.Filter.Eq("status", "A");
