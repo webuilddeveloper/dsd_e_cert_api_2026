@@ -22,57 +22,125 @@ namespace mobilev2_api.Controllers
     {
         public RegisterController() { }
 
-        // POST /login
+        // POST /read
         [HttpPost("read")]
-        public ActionResult<Response> Read([FromBody] Register value)
+        public ActionResult<Response> Read([FromBody] Criteria value)
         {
             try
             {
+                if (string.IsNullOrEmpty(value.code))
+                {
+                    return new Response { status = "E", message = "code not found" };
+                }
+
                 var col = new Database().MongoClient<Register>("register");
-                var filter = Builders<Register>.Filter.Ne(x => x.status, "D");
-                filter &= Builders<Register>.Filter.Eq("code", value.code);
+                //var filter = (Builders<Register>.Filter.Eq(x => x.isActive, true || false));
+                //&value.filterOrganization<Register>()
+                var filter = (Builders<Register>.Filter.Ne("status", "D")) & (Builders<Register>.Filter.Eq(x => x.category, "guest") | Builders<Register>.Filter.Eq(x => x.category, "facebook") | Builders<Register>.Filter.Eq(x => x.category, "google") | Builders<Register>.Filter.Eq(x => x.category, "line") | Builders<Register>.Filter.Eq(x => x.category, "apple") | Builders<Register>.Filter.Eq(x => x.category, "thaid"));
 
-                var idcard = col.Find(filter).Project(c => c.idcard ).FirstOrDefault();
-                var driverLicence = new Database().MongoClient<driverLicenceInfobase>("driverLicence")
-                    .Find(Builders<driverLicenceInfobase>.Filter.Eq("docNo", idcard)
-                    & Builders<driverLicenceInfobase>.Filter.Eq("reference", value.code)
-                    & Builders<driverLicenceInfobase>.Filter.Ne("status", "D")
-                    ).ToList();
+                if (!string.IsNullOrEmpty(value.keySearch))
+                {
+                    filter = Builders<Register>.Filter.Regex("username", new BsonRegularExpression(string.Format(".*{0}.*", value.keySearch), "i")) | (filter & Builders<Register>.Filter.Regex("firstName", new BsonRegularExpression(string.Format(".*{0}.*", value.keySearch), "i"))) | (filter & Builders<Register>.Filter.Regex("lastName", new BsonRegularExpression(string.Format(".*{0}.*", value.keySearch), "i")));
+                }
+                else
+                {
+                    if (!string.IsNullOrEmpty(value.status))
+                    {
+                        if (value.status == "VR")
+                        {
+                            filter = (Builders<Register>.Filter.Eq("status", "V") | Builders<Register>.Filter.Eq("status", "R"));
+                        }
+                        else
+                        {
+                            filter = filter & Builders<Register>.Filter.Eq("status", value.status);
+                        }
+                    }
 
-                var doc = col.Find(filter).Project(c => new
+                    if (!string.IsNullOrEmpty(value.username)) { filter = filter & Builders<Register>.Filter.Regex("username", new BsonRegularExpression(string.Format(".*{0}.*", value.username), "i")); }
+                    if (!string.IsNullOrEmpty(value.password)) { filter = filter & Builders<Register>.Filter.Eq("password", value.password); }
+                    if (!string.IsNullOrEmpty(value.code)) { filter = filter & Builders<Register>.Filter.Eq("code", value.code); }
+                    if (!string.IsNullOrEmpty(value.title)) { filter = filter & Builders<Register>.Filter.Regex("title", new BsonRegularExpression(string.Format(".*{0}.*", value.title), "i")); }
+                    if (!string.IsNullOrEmpty(value.category)) { filter = filter & Builders<Register>.Filter.Regex("category", value.category); }
+                    if (!string.IsNullOrEmpty(value.sex)) { filter = filter & Builders<Register>.Filter.Regex("sex", value.sex); }
+                    if (!string.IsNullOrEmpty(value.lineID)) { filter = filter & Builders<Register>.Filter.Regex("lineID", value.lineID); }
+                    if (!string.IsNullOrEmpty(value.line)) { filter = filter & Builders<Register>.Filter.Regex("line", value.line); }
+                    if (!string.IsNullOrEmpty(value.createBy)) { filter = filter & Builders<Register>.Filter.Regex("createBy", new BsonRegularExpression(string.Format(".*{0}.*", value.createBy), "i")); }
+
+                    var ds = value.startDate.toDateFromString().toBetweenDate();
+                    var de = value.endDate.toDateFromString().toBetweenDate();
+                    if (value.startDate != "Invalid date" && value.endDate != "Invalid date" && !string.IsNullOrEmpty(value.startDate) && !string.IsNullOrEmpty(value.endDate)) { filter = filter & Builders<Register>.Filter.Gt("docDate", ds.start) & Builders<Register>.Filter.Lt("docDate", de.end); }
+                    else if (value.startDate != "Invalid date" && !string.IsNullOrEmpty(value.startDate)) { filter = filter & Builders<Register>.Filter.Gt("docDate", ds.start) & Builders<Register>.Filter.Lt("docDate", ds.end); }
+                    else if (value.endDate != "Invalid date" && !string.IsNullOrEmpty(value.endDate)) { filter = filter & Builders<Register>.Filter.Gt("docDate", de.start) & Builders<Register>.Filter.Lt("docDate", de.end); }
+                    //filter = filter & (Builders<BsonDocument>.Filter.Eq(x => x.B, "4") | Builders<User>.Filter.Eq(x => x.B, "5"));
+                }
+
+                var docs = col.Find(filter).SortByDescending(o => o.docDate).ThenByDescending(o => o.updateTime).Skip(value.skip).Limit(value.limit).Project(c => new
                 {
                     c.code,
-                    c.idcard,
                     c.username,
                     c.password,
-                    c.category,
+                    c.isActive,
+                    c.createBy,
+                    c.createDate,
                     c.imageUrl,
+                    c.updateBy,
+                    c.updateDate,
+                    c.createTime,
+                    c.updateTime,
+                    c.docDate,
+                    c.docTime
+                    ,
+                    c.category,
+                    c.prefixName,
                     c.firstName,
                     c.lastName,
                     c.birthDay,
                     c.phone,
                     c.email,
+                    c.facebookID,
+                    c.googleID,
+                    c.lineID,
+                    c.line,
+                    c.sex,
+                    c.soi,
+                    c.address,
+                    c.moo,
+                    c.road,
+                    c.tambonCode,
+                    c.tambon,
+                    c.amphoeCode,
+                    c.amphoe,
+                    c.provinceCode,
+                    c.province,
+                    c.postnoCode,
+                    c.postno,
+                    c.job,
+                    c.idcard,
+                    c.officerCode,
                     c.countUnit,
+                    c.status,
                     c.lv0,
                     c.lv1,
                     c.lv2,
                     c.lv3,
                     c.lv4,
-                    c.lv0List,
-                    c.lv1List,
-                    c.lv2List,
-                    c.lv3List,
-                    c.lv4List,
-                    isDF = c.status == "A" ? true:false,
-                    driverLicence = driverLicence.FirstOrDefault(c => c.isActive)
-                }).FirstOrDefault();
-                return new Response { status = "S", message = "success", objectData = doc };
+                    c.linkAccount,
+                    c.appleID,
+                    c.isCert,
+                    c.isInterest,
+
+                }).ToList();
+
+                //var list = new List<object>();
+                //docs.ForEach(doc => { list.Add(BsonSerializer.Deserialize<object>(doc)); });
+                return new Response { status = "S", message = "success", objectData = docs, totalData = col.Find(filter).ToList().Count() };
             }
             catch (Exception ex)
             {
                 return new Response { status = "E", message = ex.Message };
             }
         }
+
 
         // POST /update
         //[HttpPost("update")]
@@ -398,7 +466,7 @@ namespace mobilev2_api.Controllers
                 {
                     // insert record and read again
                     value.category = "facebook";
-                    this.create(value);
+                    this.createAsync(value);
                     var newDoc = col.Find(filter).Project(c => new { c.idcard, c.code, c.username, c.password, c.category, c.prefixName, c.firstName, c.lastName, c.imageUrl, c.email, c.phone, c.countUnit, c.lv0, c.lv1, c.lv2, c.lv3, c.lv4, c.lv0List, c.lv1List, c.lv2List, c.lv3List, c.lv4List,
                         isDF = c.status == "A" ? true : false,
                         //driverLicence = driverLicence.FirstOrDefault(c => c.isActive)
@@ -444,7 +512,7 @@ namespace mobilev2_api.Controllers
                 {
                     // insert record and read again
                     value.category = "google";
-                    this.create(value);
+                    this.createAsync(value);
                     var newDoc = col.Find(filter).Project(c => new { c.idcard, c.code, c.username, c.password, c.category, c.prefixName, c.firstName, c.lastName, c.imageUrl, c.email, c.phone, c.countUnit, c.lv0, c.lv1, c.lv2, c.lv3, c.lv4, c.lv0List, c.lv1List, c.lv2List, c.lv3List, c.lv4List,
                         isDF = c.status == "A" ? true : false,
                         //driverLicence = driverLicence.FirstOrDefault(c => c.isActive)
@@ -509,7 +577,7 @@ namespace mobilev2_api.Controllers
                 {
                     // insert record and read again
                     value.category = "apple";
-                    this.create(value);
+                    this.createAsync(value);
                     var newDoc = col.Find(filter).Project(c => new {
                         c.idcard,
                         c.code,
@@ -577,7 +645,7 @@ namespace mobilev2_api.Controllers
                 {
                     // insert record and read again
                     value.category = "line";
-                    this.create(value);
+                    this.createAsync(value);
                     var newDoc = col.Find(filter).Project(c => new { c.idcard, c.code, c.username, c.password, c.category, c.prefixName, c.firstName, c.lastName, c.imageUrl, c.email, c.phone, c.countUnit, c.lv0, c.lv1, c.lv2, c.lv3, c.lv4, c.lv0List, c.lv1List, c.lv2List, c.lv3List, c.lv4List,
                         isDF = c.status == "A" ? true : false,
                         //driverLicence = driverLicence.FirstOrDefault(c => c.isActive)
@@ -603,7 +671,100 @@ namespace mobilev2_api.Controllers
             }
         }
 
-        private void create(Register value)
+        [HttpPost("thaid/login")]
+        public ActionResult<Response> ThaidLogin([FromBody] Register value)
+        {
+            try
+            {
+                var col = new Database().MongoClient<Register>("register");
+                var filter = Builders<Register>.Filter.Ne(x => x.status, "D");
+                filter &= Builders<Register>.Filter.Eq("category", "thaid");
+                filter &= Builders<Register>.Filter.Eq("idcard", value.idcard);
+
+                //var idcard = col.Find(filter).Project(c => new { c.idcard, c.code }).FirstOrDefault();
+                //var driverLicence = new Database().MongoClient<driverLicenceInfobase>("driverLicence")
+                //    .Find(Builders<driverLicenceInfobase>.Filter.Eq("docNo", idcard?.idcard ?? "")
+                //    & Builders<driverLicenceInfobase>.Filter.Eq("reference", idcard?.code ?? "")
+                //    & Builders<driverLicenceInfobase>.Filter.Ne("status", "D")
+                //    ).ToList();
+
+                var doc = col.Find(filter).Project(c => new {
+                    c.idcard,
+                    c.code,
+                    c.username,
+                    c.password,
+                    c.category,
+                    c.imageUrl,
+                    c.firstName,
+                    c.lastName,
+                    c.countUnit,
+                    c.lv0,
+                    c.lv1,
+                    c.lv2,
+                    c.lv3,
+                    c.lv4,
+                    c.lv0List,
+                    c.lv1List,
+                    c.lv2List,
+                    c.lv3List,
+                    c.lv4List,
+                    isDF = c.status == "A" ? true : false,
+                    //driverLicence = idcard != null ? driverLicence.FirstOrDefault(c => c.isActive) : new driverLicenceInfobase()
+                }).FirstOrDefault();
+
+                if (doc == null)
+                {
+                    // insert record and read again
+                    value.category = "thaid";
+                    this.createAsync(value);
+                    var newDoc = col.Find(filter).Project(c => new {
+                        c.idcard,
+                        c.code,
+                        c.username,
+                        c.password,
+                        c.category,
+                        c.prefixName,
+                        c.firstName,
+                        c.lastName,
+                        c.imageUrl,
+                        c.email,
+                        c.phone,
+                        c.countUnit,
+                        c.lv0,
+                        c.lv1,
+                        c.lv2,
+                        c.lv3,
+                        c.lv4,
+                        c.lv0List,
+                        c.lv1List,
+                        c.lv2List,
+                        c.lv3List,
+                        c.lv4List,
+                        isDF = c.status == "A" ? true : false,
+                        //driverLicence = driverLicence.FirstOrDefault(c => c.isActive)
+                    }).FirstOrDefault();
+                    return new Response { status = "S", message = "success", objectData = newDoc };
+                }
+                else
+                {
+                    var col2 = new Database().MongoClient("register");
+                    var filter2 = Builders<BsonDocument>.Filter.Ne(x => x["status"], "D");
+                    filter2 &= Builders<BsonDocument>.Filter.Eq("category", "thaid");
+                    filter2 &= Builders<BsonDocument>.Filter.Eq("idcard", value.idcard);
+                    var doc2 = col2.Find(filter2).FirstOrDefault();
+                    if (!string.IsNullOrEmpty(value.imageUrl)) { doc2["imageUrl"] = value.imageUrl; }
+                    col2.ReplaceOne(filter2, doc2);
+                    // read current record
+                    return new Response { status = "S", message = "success", objectData = doc };
+                }
+            }
+            catch (Exception ex)
+            {
+                return new Response { status = "E", message = ex.Message };
+            }
+        }
+
+        private async Task createAsync(Register value)
         {
             value.code = "".toCode();
 
@@ -615,12 +776,14 @@ namespace mobilev2_api.Controllers
             if (newCol.Find(newFilter).Any())
                 value.code = "".toCode();
 
+            var isCert = await $"http://119.13.28.171:8888/tpqi/user_profiles/{value.idcard}".HttpGet<List<CertificateModel>>();
             //return new Response { status = "E", message = $"code: {value.code} is exist", objectData = value };
 
             var newDoc = new BsonDocument
             {
                 { "code", value.code },
                 { "imageUrl", value.imageUrl },
+                { "idcard", value.idcard },
                 { "category", value.category },
                 { "username", value.username },
                 { "password", "" },
@@ -632,6 +795,7 @@ namespace mobilev2_api.Controllers
                 { "facebookID", value.facebookID },
                 { "googleID", value.googleID },
                 { "lineID", value.lineID },
+                { "isCert", isCert.Count > 0 ? true : false },
                 { "countUnit", "[]" },
                 { "lv0", "" },
                 { "lv1", "" },

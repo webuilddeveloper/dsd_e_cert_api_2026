@@ -255,11 +255,7 @@ namespace mobile_api.Controllers
         {
             try
             {
-                if (string.IsNullOrEmpty(value.code))
-                {
-                    return new Response { status = "E", message = "code not found" };
-                }
-
+              
                 var col = new Database().MongoClient<Register>("register");
                 //var filter = (Builders<Register>.Filter.Eq(x => x.isActive, true || false));
                 //&value.filterOrganization<Register>()
