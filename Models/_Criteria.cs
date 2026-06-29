@@ -18,7 +18,8 @@ namespace cms_api.Models
             title = "";
             titleEN = "";
             category = "";
-            description = "";
+            description = ""; 
+            descriptionEN = "";
             createBy = "";
             updateBy = "";
             isActive = false;
@@ -78,7 +79,8 @@ namespace cms_api.Models
         public string title { get; set; }
         public string titleEN { get; set; }
         public string category { get; set; }
-        public string description { get; set; }
+        public string description { get; set; } 
+        public string descriptionEN { get; set; }
         public string dateStart { get; set; }
         public string dateEnd { get; set; }
         public string createBy { get; set; }

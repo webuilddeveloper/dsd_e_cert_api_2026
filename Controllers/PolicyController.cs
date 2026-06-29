@@ -46,12 +46,14 @@ namespace cms_api.Controllers
                 {
                     { "code", "".toCode() },
                     { "sequence", value.sequence },
-                    { "title", value.title },
+                    { "title", value.title }, 
+                    { "titleEN", value.titleEN }, 
                     { "imageUrl", value.imageUrl },
                     { "category", value.category },
                     { "language", value.language },
                     { "isRequired", value.isRequired },
-                    { "description", value.description },
+                    { "description", value.description }, 
+                    { "descriptionEN", value.descriptionEN},
                     { "imageUrlCreateBy", value.imageUrlCreateBy },
                     { "createBy", value.updateBy },
                     { "createDate", DateTime.Now.toStringFromDate() },
@@ -110,8 +112,10 @@ namespace cms_api.Controllers
                     if (!string.IsNullOrEmpty(value.status)) { filter = filter & Builders<Policy>.Filter.Eq("status", value.status); }
                     if (!string.IsNullOrEmpty(value.category)) { filter = filter & Builders<Policy>.Filter.Eq("category", value.category); }
                     if (!string.IsNullOrEmpty(value.createBy)) { filter = filter & Builders<Policy>.Filter.Eq("createBy", value.createBy); }
-                    if (!string.IsNullOrEmpty(value.title)) { filter = filter & Builders<Policy>.Filter.Regex("title", new BsonRegularExpression(string.Format(".*{0}.*", value.title), "i")); }
+                    if (!string.IsNullOrEmpty(value.title)) { filter = filter & Builders<Policy>.Filter.Regex("title", new BsonRegularExpression(string.Format(".*{0}.*", value.title), "i")); } 
+                    if (!string.IsNullOrEmpty(value.titleEN)) { filter = filter & Builders<Policy>.Filter.Regex("titleEN", new BsonRegularExpression(string.Format(".*{0}.*", value.titleEN), "i")); }
                     if (!string.IsNullOrEmpty(value.description)) { filter = filter & Builders<Policy>.Filter.Regex("description", new BsonRegularExpression(string.Format(".*{0}.*", value.description), "i")); }
+                         if (!string.IsNullOrEmpty(value.description)) { filter = filter & Builders<Policy>.Filter.Regex("description", new BsonRegularExpression(string.Format(".*{0}.*", value.description), "i")); }
                     if (!string.IsNullOrEmpty(value.language)) { filter = filter & Builders<Policy>.Filter.Regex("language", value.language); }
                     if (!string.IsNullOrEmpty(value.sequence)) { int sequence = Int32.Parse(value.sequence); filter = filter & Builders<Policy>.Filter.Eq("sequence", sequence); }
 
