@@ -259,7 +259,7 @@ namespace mobile_api.Controllers
                 var col = new Database().MongoClient<Register>("register");
                 //var filter = (Builders<Register>.Filter.Eq(x => x.isActive, true || false));
                 //&value.filterOrganization<Register>()
-                var filter = (Builders<Register>.Filter.Ne("status", "D")) & (Builders<Register>.Filter.Eq(x => x.category, "guest") | Builders<Register>.Filter.Eq(x => x.category, "facebook") | Builders<Register>.Filter.Eq(x => x.category, "google") | Builders<Register>.Filter.Eq(x => x.category, "line") | Builders<Register>.Filter.Eq(x => x.category, "apple"));
+                var filter = (Builders<Register>.Filter.Ne("status", "D")) & (Builders<Register>.Filter.Eq(x => x.category, "guest") | Builders<Register>.Filter.Eq(x => x.category, "facebook") | Builders<Register>.Filter.Eq(x => x.category, "google") | Builders<Register>.Filter.Eq(x => x.category, "line") | Builders<Register>.Filter.Eq(x => x.category, "apple") | Builders<Register>.Filter.Eq(x => x.category, "thaid"));
 
                 if (!string.IsNullOrEmpty(value.keySearch))
                 {
