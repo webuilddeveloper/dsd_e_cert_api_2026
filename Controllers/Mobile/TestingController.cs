@@ -77,7 +77,21 @@ namespace mobile_api.Controllers
         {
             try
             {
-                var docs = await $"http://119.13.28.171:8888/globe/testing/{value.keySearch}".HttpGet<List<PersonalTestingModel>>();
+                var docs = await $"http://119.13.28.171:8888/globe/testing/{value.keySearch}".HttpGet<List<TestingModel>>();
+                return new Response { status = "S", message = "success", objectData = docs, totalData = docs.Count };
+            }
+            catch (Exception ex)
+            {
+                return new Response { status = "E", message = ex.Message };
+            }
+        }
+
+        [HttpPost("readAPIPersonal")]
+        public async Task<ActionResult<Response>> ReadAPIAsync([FromBody] Criteria value)
+        {
+            try
+            {
+                var docs = await $"http://119.13.28.171:8888/globe/testing_res/{value.keySearch}".HttpGet<List<PersonalTestingModel>>();
                 return new Response { status = "S", message = "success", objectData = docs, totalData = docs.Count };
             }
             catch (Exception ex)

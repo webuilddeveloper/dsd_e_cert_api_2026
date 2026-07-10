@@ -215,6 +215,12 @@ namespace cms_api.Models
 
         [JsonProperty("CER_EXPIRE")]
         public DateTime? CerExpire { get; set; }
+
+        [JsonProperty("PATH_CER")]
+        public string PathCer { get; set; }
+
+        [JsonProperty("TRAINING_ID")]
+        public string TraningId { get; set; }
     }
 
     public class RegisterInterest : Identity

@@ -84,8 +84,14 @@ namespace cms_api.Models
 
     public class PersonalTestingModel
     {
+        [JsonProperty("PERSONAL_ID")]
+        public string PersonalId { get; set; }
+
         [JsonProperty("TESTING_ID")]
         public string TestingId { get; set; }
+
+        [JsonProperty("PROVINCE_NAME")]
+        public string ProvinceName { get; set; }
 
         [JsonProperty("TEST_OCCUPATION_NAME")]
         public string TestOccupationName { get; set; }
@@ -102,14 +108,11 @@ namespace cms_api.Models
         [JsonProperty("END_DATE")]
         public DateTime? EndDate { get; set; }
 
-        [JsonProperty("SITE")]
-        public string Site { get; set; }
-
-        [JsonProperty("PROVINCE_NAME")]
-        public string ProvinceName { get; set; }
-
         [JsonProperty("BUDGET_YEAR")]
         public string BudgetYear { get; set; }
+
+        [JsonProperty("STATUS_CHECK")]
+        public string StatusCheck { get; set; }
     }
 
 }
