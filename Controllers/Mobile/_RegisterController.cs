@@ -3006,6 +3006,36 @@ namespace mobile_api.Controllers
             }
         }
 
+        [HttpPost("GetCretTesting")]
+        public async Task<ActionResult<Response>> GetCretTesting([FromBody] Register value)
+        {
+            try
+            {
+                var docs = await $"http://119.13.28.171:8888/cdc/user_profiles_test/{value.idcard}".HttpGet<List<CertificateModel>>();
+
+                return new Response { status = "S", message = "success", objectData = docs, totalData = docs.Count };
+            }
+            catch (Exception ex)
+            {
+                return new Response { status = "E", message = ex.Message };
+            }
+        }
+
+        [HttpPost("GetCretKnowledge")]
+        public async Task<ActionResult<Response>> GetCretKnowledge([FromBody] Register value)
+        {
+            try
+            {
+                var docs = await $"http://119.13.28.171:8888/cdc/user_profiles_oloc/{value.idcard}".HttpGet<List<CertificateModel>>();
+
+                return new Response { status = "S", message = "success", objectData = docs, totalData = docs.Count };
+            }
+            catch (Exception ex)
+            {
+                return new Response { status = "E", message = ex.Message };
+            }
+        }
+
         [HttpPost("CraterInterest")]
         public async Task<ActionResult<Response>> CraterInterest([FromBody] RegisterInterest value)
         {

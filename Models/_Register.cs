@@ -221,6 +221,12 @@ namespace cms_api.Models
 
         [JsonProperty("TRAINING_ID")]
         public string TraningId { get; set; }
+
+        [JsonProperty("TESTING_ID")]
+        public string TestingId { get; set; }
+
+        [JsonProperty("FORM_ID")]
+        public string FormId { get; set; }
     }
 
     public class RegisterInterest : Identity
