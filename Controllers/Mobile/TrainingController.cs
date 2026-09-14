@@ -29,7 +29,11 @@ namespace mobile_api.Controllers
                 List<TrainingModel> docs = new List<TrainingModel>();
 
                 docs = await $"http://119.13.28.171:8888/globe/training/{value.keySearch}".HttpGet<List<TrainingModel>>();
-                if (docs == null) docs = new List<TrainingModel>();
+                if (docs == null || docs.Count == 0)
+                {
+                    docs = new List<TrainingModel>();
+                    return new Response { status = "F", message = "ไม่สามารถเชื่อมต่อกับทาง DSD ได้" };
+                }
 
                 var colCategory = new Database().MongoClient<Category>("trainingCategory");
                 var filterCategory = Builders<Category>.Filter.Eq(x => x.status, "A");
