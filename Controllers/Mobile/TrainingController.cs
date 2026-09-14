@@ -48,27 +48,37 @@ namespace mobile_api.Controllers
                         docs = docs.Where(c => keys.Any(k => c.Course.ToLower().Contains(k))).ToList();
                     }
                 }
-
                 if (!string.IsNullOrEmpty(value.profileCode))
                 {
                     var colInterest = new Database().MongoClient<RegisterInterestModel>("registerInterest");
-                    var interestedCodes = colInterest.Find(x => x.profileCode == value.profileCode)
-                                                    .Project(p => p.trainingCategory).ToList();
 
-                    var userKeywords = allCategoryList
-                        .Where(c => interestedCodes.Contains(c.code) && !string.IsNullOrEmpty(c.description))
-                        .SelectMany(c => Regex.Split(c.description, @"[;,\s]+"))
-                        .Select(k => k.Trim().ToLower()).Distinct().ToList();
+                    var interestedCodes = colInterest.Find(x => x.profileCode == value.profileCode && x.isActive == true)
+                                                     .Project(p => p.trainingCategory).ToList();
 
-                    if (userKeywords.Any())
+                 
+                    if (interestedCodes.Any())
                     {
-                        var recommended = docs.Where(c => userKeywords.Any(k => c.Course.ToLower().Contains(k))).ToList();
-                        var others = docs.Where(c => !userKeywords.Any(k => c.Course.ToLower().Contains(k))).ToList();
-                        docs = recommended.Concat(others).ToList();
+                        var userKeywords = allCategoryList
+                            .Where(c => interestedCodes.Contains(c.code) && !string.IsNullOrEmpty(c.description))
+                            .SelectMany(c => Regex.Split(c.description, @"[;,\r\n]+"))
+                            .Select(k => k.Trim().ToLower())
+                            .Where(k => !string.IsNullOrEmpty(k))
+                            .Distinct()
+                            .ToList();
+
+                        if (userKeywords.Any())
+                        {
+                            var recommended = docs
+                                .Where(c => !string.IsNullOrEmpty(c.Course) &&
+                                            userKeywords.Any(k => c.Course.ToLower().Contains(k)))
+                                .ToList();
+
+                            docs = recommended;
+                        }
                     }
                 }
 
-                return new Response { status = "S", message = "success", objectData = docs, totalData = docs.Count };
+                return new Response { status = "S",   message = docs.Count == 0 ? "ยังไม่พบคอร์สที่ตรงกับความสนใจของคุณในขณะนี้" : "success", objectData = docs, totalData = docs.Count };
             }
             catch (Exception ex)
             {
@@ -96,8 +106,8 @@ namespace mobile_api.Controllers
         {
             try
             {
-                var col = new Database().MongoClient<Training>( "training");
-                var filter = (Builders<Training>.Filter.Eq("status", "A") );
+                var col = new Database().MongoClient<Training>("training");
+                var filter = (Builders<Training>.Filter.Eq("status", "A"));
 
                 if (!string.IsNullOrEmpty(value.code)) { filter = filter & Builders<Training>.Filter.Eq("code", value.code); }
                 if (!string.IsNullOrEmpty(value.keySearch)) { filter = filter & Builders<Training>.Filter.Regex("title", new BsonRegularExpression(string.Format(".*{0}.*", value.keySearch), "i")); }
@@ -114,10 +124,11 @@ namespace mobile_api.Controllers
                 else if (value.endDate != "Invalid date" && !string.IsNullOrEmpty(value.endDate)) { filter = filter & Builders<Training>.Filter.Gt("docDate", de.start) & Builders<Training>.Filter.Lt("docDate", de.end); }
                 //filter = filter & (Builders<BsonDocument>.Filter.Eq(x => x.B, "4") | Builders<User>.Filter.Eq(x => x.B, "5"));
 
-                var docs = col.Find(filter).SortBy(o => o.sequence).ThenByDescending(o => o.docDate).ThenByDescending(o => o.updateTime).Skip(value.skip).Limit(value.limit).Project(c => new Training { 
+                var docs = col.Find(filter).SortBy(o => o.sequence).ThenByDescending(o => o.docDate).ThenByDescending(o => o.updateTime).Skip(value.skip).Limit(value.limit).Project(c => new Training
+                {
                     code = c.code,
                     isActive = c.isActive,
-                    
+
                     imageUrl = c.imageUrl,
                     sequence = c.sequence,
                     language = c.language,
@@ -145,7 +156,7 @@ namespace mobile_api.Controllers
                     var view = docs[0].view;
 
                     var doc = new BsonDocument();
-                    var colUpdate = new Database().MongoClient( "training");
+                    var colUpdate = new Database().MongoClient("training");
 
                     var filterUpdate = Builders<BsonDocument>.Filter.Eq("code", value.code);
                     doc = colUpdate.Find(filterUpdate).FirstOrDefault();
@@ -173,7 +184,8 @@ namespace mobile_api.Controllers
                 }
                 //END :update view <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
-                docs.ForEach(c => {
+                docs.ForEach(c =>
+                {
                     // check username duplicate
 
                     if (!string.IsNullOrEmpty(value.username))
@@ -242,10 +254,11 @@ namespace mobile_api.Controllers
         {
             try
             {
-                if (value.year == 0) {
+                if (value.year == 0)
+                {
                     return new Response { status = "E", message = "Error input year." };
                 }
-                var col = new Database().MongoClient<Training>( "training");
+                var col = new Database().MongoClient<Training>("training");
                 var filter = Builders<Training>.Filter.Eq("status", "A");
                 if (!string.IsNullOrEmpty(value.language)) { filter = filter & Builders<Training>.Filter.Regex("language", value.language); }
 
@@ -326,7 +339,7 @@ namespace mobile_api.Controllers
         {
             try
             {
-                var col = new Database().MongoClient<Gallery>( "trainingGallery");
+                var col = new Database().MongoClient<Gallery>("trainingGallery");
 
                 var filter = Builders<Gallery>.Filter.Eq(x => x.isActive, true);
                 if (!string.IsNullOrEmpty(value.code)) { filter = filter & Builders<Gallery>.Filter.Regex("reference", value.code); }
@@ -421,7 +434,7 @@ namespace mobile_api.Controllers
         {
             try
             {
-                var col = new Database().MongoClient<Category>( "trainingCategory");
+                var col = new Database().MongoClient<Category>("trainingCategory");
 
                 var filter = Builders<Category>.Filter.Eq(x => x.status, "A");
                 if (!string.IsNullOrEmpty(value.keySearch))
@@ -445,7 +458,7 @@ namespace mobile_api.Controllers
                     //filter = filter & (Builders<BsonDocument>.Filter.Eq(x => x.B, "4") | Builders<User>.Filter.Eq(x => x.B, "5"));
                 }
 
-                var docs = col.Find(filter).SortBy(o => o.sequence).ThenByDescending(o => o.docDate).ThenByDescending(o => o.updateTime).Skip(value.skip).Limit(value.limit).Project(c => new { c.code, c.title ,c.titleEN , c.language, c.imageUrl, c.createBy, c.createDate, c.isActive }).ToList();
+                var docs = col.Find(filter).SortBy(o => o.sequence).ThenByDescending(o => o.docDate).ThenByDescending(o => o.updateTime).Skip(value.skip).Limit(value.limit).Project(c => new { c.code, c.title, c.titleEN, c.language, c.imageUrl, c.createBy, c.createDate, c.isActive }).ToList();
 
                 return new Response { status = "S", message = "success", jsonData = docs.ToJson(), objectData = docs };
             }
@@ -484,7 +497,7 @@ namespace mobile_api.Controllers
             var doc = new BsonDocument();
             try
             {
-                var col = new Database().MongoClient( "trainingRegister");
+                var col = new Database().MongoClient("trainingRegister");
 
                 //check duplicate
                 {
@@ -538,14 +551,15 @@ namespace mobile_api.Controllers
             try
             {
                 value.statisticsCreate("trainingRegister");
-                var col = new Database().MongoClient<Comment>( "trainingRegister");
+                var col = new Database().MongoClient<Comment>("trainingRegister");
 
                 var filter = Builders<Comment>.Filter.Eq(x => x.isActive, true);
                 if (!string.IsNullOrEmpty(value.code)) { filter = filter & Builders<Comment>.Filter.Regex("reference", value.code); }
                 //filter = filter & (Builders<BsonDocument>.Filter.Eq(x => x.B, "4") | Builders<User>.Filter.Eq(x => x.B, "5"));
 
                 var docs = col.Find(filter).SortBy(o => o.sequence).ThenByDescending(o => o.updateDate).ThenByDescending(o => o.updateTime).Skip(value.skip).Limit(value.limit).Project(c =>
-                new {
+                new
+                {
                     c.reference,
                     c.createBy,
                     c.createDate,
