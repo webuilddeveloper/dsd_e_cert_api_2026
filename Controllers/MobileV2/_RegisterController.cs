@@ -778,7 +778,7 @@ namespace mobilev2_api.Controllers
             if (newCol.Find(newFilter).Any())
                 value.code = "".toCode();
 
-            //var isCert = await $"http://119.13.28.171:8888/tpqi/user_profiles/{value.idcard}".HttpGet<List<CertificateModel>>();
+            var isCert = await $"http://119.13.28.171:8888/tpqi/user_profiles/{value.idcard}".HttpGet<List<CertificateModel>>();
             //return new Response { status = "E", message = $"code: {value.code} is exist", objectData = value };
 
             var newDoc = new BsonDocument
@@ -797,8 +797,8 @@ namespace mobilev2_api.Controllers
                 { "facebookID", value.facebookID },
                 { "googleID", value.googleID },
                 { "lineID", value.lineID },
-                //{ "isCert", isCert.Count > 0 ? true : false },
-                { "isCert", true },
+                { "isCert", isCert.Count > 0 ? true : false },
+                //{ "isCert", true },
                 { "countUnit", "[]" },
                 { "lv0", "" },
                 { "lv1", "" },
