@@ -129,6 +129,7 @@ namespace mobilev2_api.Controllers
                     c.appleID,
                     c.isCert,
                     c.isInterest,
+                    c.isPdpa,
 
                 }).ToList();
 

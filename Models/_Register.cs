@@ -101,6 +101,7 @@ namespace cms_api.Models
 
         public bool isCert { get; set; }
         public bool isInterest { get; set; }
+        public bool isPdpa { get; set; }
     }
     public class Register1 : BlankIdentity
     {
