@@ -424,7 +424,7 @@ namespace mobilev2_api.Controllers
 
         // POST /login
         [HttpPost("facebook/login")]
-        public ActionResult<Response> FacebookLogin([FromBody] Register value)
+        public async Task<ActionResult<Response>> FacebookLogin([FromBody] Register value)
         {
             try
             {
@@ -468,7 +468,7 @@ namespace mobilev2_api.Controllers
                 {
                     // insert record and read again
                     value.category = "facebook";
-                    this.createAsync(value);
+                    await this.createAsync(value);
                     var newDoc = col.Find(filter).Project(c => new { c.idcard, c.code, c.username, c.password, c.category, c.prefixName, c.firstName, c.lastName, c.imageUrl, c.email, c.phone, c.countUnit, c.lv0, c.lv1, c.lv2, c.lv3, c.lv4, c.lv0List, c.lv1List, c.lv2List, c.lv3List, c.lv4List,
                         isDF = c.status == "A" ? true : false,
                         //driverLicence = driverLicence.FirstOrDefault(c => c.isActive)
@@ -489,7 +489,7 @@ namespace mobilev2_api.Controllers
 
         // POST /login
         [HttpPost("google/login")]
-        public ActionResult<Response> GoogleLogin([FromBody] Register value)
+        public async Task<ActionResult<Response>> GoogleLoginAsync([FromBody] Register value)
         {
             try
             {
@@ -514,7 +514,7 @@ namespace mobilev2_api.Controllers
                 {
                     // insert record and read again
                     value.category = "google";
-                    this.createAsync(value);
+                    await this.createAsync(value);
                     var newDoc = col.Find(filter).Project(c => new { c.idcard, c.code, c.username, c.password, c.category, c.prefixName, c.firstName, c.lastName, c.imageUrl, c.email, c.phone, c.countUnit, c.lv0, c.lv1, c.lv2, c.lv3, c.lv4, c.lv0List, c.lv1List, c.lv2List, c.lv3List, c.lv4List,
                         isDF = c.status == "A" ? true : false,
                         //driverLicence = driverLicence.FirstOrDefault(c => c.isActive)
@@ -535,7 +535,7 @@ namespace mobilev2_api.Controllers
 
         // POST /login
         [HttpPost("apple/login")]
-        public ActionResult<Response> AppleLogin([FromBody] Register value)
+        public async Task<ActionResult<Response>> AppleLoginAsync([FromBody] Register value)
         {
             try
             {
@@ -579,7 +579,7 @@ namespace mobilev2_api.Controllers
                 {
                     // insert record and read again
                     value.category = "apple";
-                    this.createAsync(value);
+                    await this.createAsync(value);
                     var newDoc = col.Find(filter).Project(c => new {
                         c.idcard,
                         c.code,
@@ -622,7 +622,7 @@ namespace mobilev2_api.Controllers
 
         // POST /login
         [HttpPost("line/login")]
-        public ActionResult<Response> LineLogin([FromBody] Register value)
+        public async Task<ActionResult<Response>> LineLoginAsync([FromBody] Register value)
         {
             try
             {
@@ -647,7 +647,7 @@ namespace mobilev2_api.Controllers
                 {
                     // insert record and read again
                     value.category = "line";
-                    this.createAsync(value);
+                    await this.createAsync(value);
                     var newDoc = col.Find(filter).Project(c => new { c.idcard, c.code, c.username, c.password, c.category, c.prefixName, c.firstName, c.lastName, c.imageUrl, c.email, c.phone, c.countUnit, c.lv0, c.lv1, c.lv2, c.lv3, c.lv4, c.lv0List, c.lv1List, c.lv2List, c.lv3List, c.lv4List,
                         isDF = c.status == "A" ? true : false,
                         //driverLicence = driverLicence.FirstOrDefault(c => c.isActive)
@@ -674,7 +674,7 @@ namespace mobilev2_api.Controllers
         }
 
         [HttpPost("thaid/login")]
-        public ActionResult<Response> ThaidLogin([FromBody] Register value)
+        public async Task<ActionResult<Response>> ThaidLoginAsync([FromBody] Register value)
         {
             try
             {
@@ -718,7 +718,7 @@ namespace mobilev2_api.Controllers
                 {
                     // insert record and read again
                     value.category = "thaid";
-                    this.createAsync(value);
+                    await this.createAsync(value);
                     var newDoc = col.Find(filter).Project(c => new {
                         c.idcard,
                         c.code,
