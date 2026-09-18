@@ -32,7 +32,7 @@ namespace mobile_api.Controllers
                 if (docs == null || docs.Count == 0)
                 {
                     docs = new List<TrainingModel>();
-                    return new Response { status = "F", message = "ไม่สามารถเชื่อมต่อกับทาง DSD ได้" };
+                    return new Response { status = "F", message = "ไม่พบข้อมูล" };
                 }
 
                 var colCategory = new Database().MongoClient<Category>("trainingCategory");
